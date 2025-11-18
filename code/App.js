@@ -6,6 +6,7 @@ import SignUpScreen from './screens/auth/SignUpScreen';
 import ListItemsScreen from './screens/items/ListItemsScreen';
 import PlaceholderVendre from './screens/items/PlaceholderVendre';
 import PlaceholderProgrammes from './screens/items/PlaceholderProgrammes';
+import ProgrammeCoursScreen from './screens/items/ProgrammeCoursScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +34,10 @@ export default function App() {
           <Stack.Screen 
             name="Programmes" 
             component={PlaceholderProgrammes} 
+          />
+          <Stack.Screen 
+            name="ProgrammeCours" 
+            component={ProgrammeCoursScreen} 
           />
         </Stack.Navigator>
       </NavigationContainer>
