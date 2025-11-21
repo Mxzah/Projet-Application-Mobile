@@ -7,6 +7,7 @@ import ListAnnoncesScreen from './screens/items/ListAnnoncesScreen';
 import PlaceholderVendre from './screens/items/PlaceholderVendre';
 import PlaceholderProgrammes from './screens/items/PlaceholderProgrammes';
 import ProgrammeCoursScreen from './screens/items/ProgrammeCoursScreen';
+import ProfilScreen from './screens/profil/ProfilScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -15,29 +16,33 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Connexion" screenOptions={{ headerShown: false }}>
-          <Stack.Screen 
-            name="Connexion" 
-            component={LoginScreen} 
+          <Stack.Screen
+            name="Connexion"
+            component={LoginScreen}
           />
-          <Stack.Screen 
-            name="Inscription" 
-            component={SignUpScreen} 
+          <Stack.Screen
+            name="Inscription"
+            component={SignUpScreen}
           />
-          <Stack.Screen 
-            name="ListAnnonces" 
-            component={ListAnnoncesScreen} 
+          <Stack.Screen
+            name="ListAnnonces"
+            component={ListAnnoncesScreen}
           />
-          <Stack.Screen 
-            name="Vendre" 
-            component={PlaceholderVendre} 
+          <Stack.Screen
+            name="Vendre"
+            component={PlaceholderVendre}
           />
-          <Stack.Screen 
-            name="Programmes" 
-            component={PlaceholderProgrammes} 
+          <Stack.Screen
+            name="Programmes"
+            component={PlaceholderProgrammes}
           />
-          <Stack.Screen 
-            name="ProgrammeCours" 
-            component={ProgrammeCoursScreen} 
+          <Stack.Screen
+            name="ProgrammeCours"
+            component={ProgrammeCoursScreen}
+          />
+          <Stack.Screen
+            name="Profil"
+            component={ProfilScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

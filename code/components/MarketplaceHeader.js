@@ -1,13 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function MarketplaceHeader({
   active = 'Acheter',
-  onPressVendre = () => {},
-  onPressAcheter = () => {},
-  onPressProgrammes = () => {},
+  onPressVendre = () => { },
+  onPressAcheter = () => { },
+  onPressProgrammes = () => { },
 }) {
+  const navigation = useNavigation();
   const isActive = (tab) => active === tab;
   return (
     <View style={styles.container}>
@@ -17,7 +20,7 @@ export default function MarketplaceHeader({
 
         <View style={styles.rightIcons}>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="person-circle-outline" size={26} color="black" />
+            <Ionicons name="person-circle-outline" size={26} color="black" onPress={() => navigation.navigate('Profil')} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="search-outline" size={22} color="black" />
