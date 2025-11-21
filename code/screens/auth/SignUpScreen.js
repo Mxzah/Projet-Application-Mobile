@@ -30,9 +30,8 @@ export default function SignUpScreen({ navigation }) {
       setIsSubmitting(false);
 
       if (success) {
-        Alert.alert('Succès', 'Compte créé !', [
-          { text: 'OK', onPress: () => navigation.goBack() },
-        ]);
+        console.log("success");
+        navigation.navigate("ListAnnonces");
       } else {
         Alert.alert(
           'Erreur',

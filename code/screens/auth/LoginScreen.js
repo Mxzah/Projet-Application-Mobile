@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert, ActivityIndicator } from "react-native";
 import authService from "../../services/Auth";
-//allo
+
 export default function LoginScreen({ navigation }) {
   const [courriel, setCourriel] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
