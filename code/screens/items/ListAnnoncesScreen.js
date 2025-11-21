@@ -1,8 +1,9 @@
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, Button, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
 
-const ITEMS = [
+const ANNONCES = [
   {
     id_annonce: 1,
     titre: '2019 McLaren 570S',
@@ -12,7 +13,6 @@ const ITEMS = [
     date_fin: '2025-12-31T23:59:59Z',
     prix_demande: 298900.0,
     id_cours: 1,
-    id_categorie: 10,
     id_utilisateur: 101,
     image: require('./assets/1.jpg'),
   },
@@ -25,7 +25,6 @@ const ITEMS = [
     date_fin: '2025-12-30T23:59:59Z',
     prix_demande: 180.0,
     id_cours: 2,
-    id_categorie: 20,
     id_utilisateur: 102,
     image: require('./assets/2.jpg'),
   },
@@ -38,7 +37,6 @@ const ITEMS = [
     date_fin: '2025-11-30T23:59:59Z',
     prix_demande: 950.0,
     id_cours: 3,
-    id_categorie: 30,
     id_utilisateur: 103,
     image: require('./assets/3.jpg'),
   },
@@ -51,7 +49,6 @@ const ITEMS = [
     date_fin: '2025-12-15T23:59:59Z',
     prix_demande: 45.0,
     id_cours: 4,
-    id_categorie: 40,
     id_utilisateur: 104,
     image: require('./assets/4.jpg'),
   },
@@ -65,7 +62,30 @@ function formatPrice(n) {
   }
 }
 
-export default function ListItemsScreen({ navigation }) {
+export default function ListAnnoncesScreen({ navigation, route }) {
+  const [selectedCoursIds, setSelectedCoursIds] = useState(() => route?.params?.filteredCoursIds ?? []);
+
+  useEffect(() => {
+    const incoming = route?.params?.filteredCoursIds;
+    if (Array.isArray(incoming)) {
+      setSelectedCoursIds(incoming);
+    }
+  }, [route?.params?.filteredCoursIds]);
+
+  const filteredAnnonces = useMemo(() => {
+    if (!selectedCoursIds?.length) return ANNONCES;
+    return ANNONCES.filter((annonce) => selectedCoursIds.includes(annonce.id_cours));
+  }, [selectedCoursIds]);
+
+  const handleOpenProgrammes = () => {
+    navigation.navigate('Programmes', { selectedCoursIds });
+  };
+
+  const handleClearFilters = () => {
+    navigation.setParams?.({ filteredCoursIds: [] });
+    setSelectedCoursIds([]);
+  };
+
   function renderCard({ item }) {
     return (
       <TouchableOpacity style={styles.card} activeOpacity={0.8}>
@@ -85,21 +105,33 @@ export default function ListItemsScreen({ navigation }) {
         active="Acheter"
         onPressVendre={() => navigation.navigate('Vendre')}
         onPressAcheter={() => { /* already here */ }}
-        onPressProgrammes={() => navigation.navigate('Programmes')}
+        onPressProgrammes={handleOpenProgrammes}
       />
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Sélection du jour</Text>
       </View>
 
+      {selectedCoursIds.length > 0 && (
+        <View style={styles.filtersBanner}>
+          <Text style={styles.filtersText}>
+            {selectedCoursIds.length} cours sélectionné{selectedCoursIds.length > 1 ? 's' : ''}
+          </Text>
+          <Button title="Effacer" onPress={handleClearFilters} />
+        </View>
+      )}
+
       <FlatList
-        data={ITEMS}
+        data={filteredAnnonces}
         keyExtractor={(it) => String(it.id_annonce)}
         renderItem={renderCard}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.grid}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <Text style={styles.empty}>Aucune annonce ne correspond à ces filtres.</Text>
+        }
       />
     </SafeAreaView>
   );
@@ -152,5 +184,26 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontWeight: '700',
     fontSize: 16,
+  },
+  filtersBanner: {
+    marginHorizontal: 12,
+    marginBottom: 8,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#d1d5db',
+    backgroundColor: '#f9fafb',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  filtersText: {
+    fontWeight: '600',
+    color: '#111827',
+  },
+  empty: {
+    textAlign: 'center',
+    color: '#6b7280',
+    paddingVertical: 40,
   },
 });

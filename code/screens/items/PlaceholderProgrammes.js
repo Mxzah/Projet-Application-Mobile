@@ -1,10 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Button, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
 
-export default function PlaceholderProgrammes({ navigation }) {
+export default function PlaceholderProgrammes({ navigation, route }) {
   const PROGRAMMES = [
     { id_programme: 1, nom: 'Techniques de l’informatique', description: 'Programme axé sur le développement logiciel, les réseaux et la cybersécurité.', nb_sessions: 6 },
     { id_programme: 2, nom: 'Sciences humaines', description: 'Étude des comportements humains, de la société et des sciences sociales.', nb_sessions: 4 },
@@ -98,8 +98,16 @@ export default function PlaceholderProgrammes({ navigation }) {
     return acc;
   }, []);
 
+  const initialSelectedCours = route?.params?.selectedCoursIds ?? [];
   const [expandedId, setExpandedId] = useState(null);
-  const [selectedCours, setSelectedCours] = useState(new Set());
+  const [selectedCours, setSelectedCours] = useState(() => new Set(initialSelectedCours));
+
+  useEffect(() => {
+    const incoming = route?.params?.selectedCoursIds;
+    if (Array.isArray(incoming)) {
+      setSelectedCours(new Set(incoming));
+    }
+  }, [route?.params?.selectedCoursIds]);
   const toggleExpand = (id) => setExpandedId(prev => (prev === id ? null : id));
 
   const programmeChecked = (progId) => {
@@ -124,6 +132,11 @@ export default function PlaceholderProgrammes({ navigation }) {
     const next = new Set(selectedCours);
     if (next.has(coursId)) next.delete(coursId); else next.add(coursId);
     setSelectedCours(next);
+  };
+
+  const handleApplyFilters = () => {
+    const ids = Array.from(selectedCours);
+    navigation.navigate('ListAnnonces', { filteredCoursIds: ids });
   };
 
   const Check = ({ checked, onPress }) => (
@@ -176,8 +189,8 @@ export default function PlaceholderProgrammes({ navigation }) {
     <SafeAreaView style={styles.container}>
       <MarketplaceHeader
         active="Programmes"
-        onPressVendre={() => navigation.navigate('Vendre')}
-        onPressAcheter={() => navigation.navigate('ListeItems')}
+        onPressVendre={() => navigation.navigate('Vendre')} 
+        onPressAcheter={() => navigation.navigate('ListAnnonces')}
         onPressProgrammes={() => { /* already here */ }}
       />
       <View style={styles.listHeader}>
@@ -191,7 +204,7 @@ export default function PlaceholderProgrammes({ navigation }) {
         showsVerticalScrollIndicator={false}
       />
       <View style={{ padding: 12 }}>
-        <Button title="Retour" onPress={() => navigation.goBack()} />
+        <Button title="Appliquer les filtres" onPress={handleApplyFilters} />
       </View>
     </SafeAreaView>
   );

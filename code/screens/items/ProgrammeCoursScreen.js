@@ -20,7 +20,7 @@ export default function ProgrammeCoursScreen({ route, navigation }) {
       <MarketplaceHeader
         active="Programmes"
         onPressVendre={() => navigation.navigate('Vendre')}
-        onPressAcheter={() => navigation.navigate('ListeItems')}
+        onPressAcheter={() => navigation.navigate('ListAnnonces')}
         onPressProgrammes={() => navigation.navigate('Programmes')}
       />
       <View style={styles.listHeader}>

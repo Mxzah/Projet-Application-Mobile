@@ -24,7 +24,8 @@ export default function LoginScreen({ navigation }) {
       setLoading(false);
 
       if (success) {
-        navigation.navigate("ListeItems");
+        console.log("success");
+        navigation.navigate("ListAnnonces");
       } else {
         Alert.alert("Erreur", "Courriel ou mot de passe incorrect.");
       }
@@ -63,6 +64,7 @@ export default function LoginScreen({ navigation }) {
       ) : (
         <Button title="Se connecter" onPress={handleLogin} />
       )}
+      <Button title="Créer un compte" onPress={() => navigation.navigate('Inscription')} />
     </View>
 
 
