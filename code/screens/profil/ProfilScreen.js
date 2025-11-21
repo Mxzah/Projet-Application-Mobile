@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import authService from "../../services/Auth";
+import { useTheme } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
 
 // --- Tes annonces mock ---
 const ANNONCES = [
@@ -104,6 +105,8 @@ export default function ProfilScreen({ navigation }) {
         }, [])
     );
 
+    const { theme, toggleTheme, isDark } = useTheme();
+
     const mesAnnonces = useMemo(() => {
         if (!user) return [];
         return ANNONCES.filter((a) => a.id_utilisateur === user.id);
@@ -127,26 +130,32 @@ export default function ProfilScreen({ navigation }) {
     const renderAvis = ({ item }) => {
         const date = new Date(item.date_avis).toLocaleDateString();
 
-        // étoiles simple
         const stars = "★".repeat(item.note) + "☆".repeat(5 - item.note);
 
         return (
-            <View style={styles.avisCard}>
-                <Text style={styles.avisStars}>{stars}</Text>
+            <View style={[styles.avisCard, { backgroundColor: theme.card }]}>
+
+                <Text style={[styles.avisStars, { color: theme.text }]}>
+                    {stars}
+                </Text>
 
                 {item.commentaire ? (
-                    <Text style={styles.avisCommentaire}>{item.commentaire}</Text>
+                    <Text style={[styles.avisCommentaire, { color: theme.text }]}>
+                        {item.commentaire}
+                    </Text>
                 ) : (
-                    <Text style={styles.avisCommentaireMuted}>Aucun commentaire</Text>
+                    <Text style={[styles.avisCommentaireMuted, { color: theme.textLight }]}>
+                        Aucun commentaire
+                    </Text>
                 )}
 
-                <Text style={styles.avisMeta}>
+                <Text style={[styles.avisMeta, { color: theme.textLight }]}>
                     Le {date} • par l’utilisateur #{item.id_noteur}
                 </Text>
+
             </View>
         );
     };
-
 
     const renderAnnonce = ({ item }) => {
         const debut = new Date(item.date_debut).toLocaleDateString();
@@ -154,27 +163,30 @@ export default function ProfilScreen({ navigation }) {
 
         return (
             <TouchableOpacity
-                style={styles.annonceCard}
-                onPress={() =>
-                    navigation?.navigate?.("DetailsAnnonce", { annonce: item })
-                }
+                style={[styles.annonceCard, { backgroundColor: theme.card }]}
+                onPress={() => navigation.navigate("DetailsAnnonce", { annonce: item })}
                 activeOpacity={0.85}
             >
                 <Image source={item.image} style={styles.annonceImage} />
 
                 <View style={{ flex: 1 }}>
-                    <Text style={styles.annonceTitre} numberOfLines={1}>
+
+                    <Text style={[styles.annonceTitre, { color: theme.text }]} numberOfLines={1}>
                         {item.titre}
                     </Text>
 
-                    <Text style={styles.annonceLieu}>{item.lieu}</Text>
-                    <Text style={styles.annoncePrix}>
+                    <Text style={[styles.annonceLieu, { color: theme.textLight }]}>
+                        {item.lieu}
+                    </Text>
+
+                    <Text style={[styles.annoncePrix, { color: theme.text }]}>
                         {item.prix_demande.toFixed(2)} $
                     </Text>
 
-                    <Text style={styles.annonceDates}>
+                    <Text style={[styles.annonceDates, { color: theme.textLight }]}>
                         {debut} → {fin}
                     </Text>
+
                 </View>
             </TouchableOpacity>
         );
@@ -183,22 +195,34 @@ export default function ProfilScreen({ navigation }) {
 
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
+        <ScrollView
+            style={[styles.container, { backgroundColor: theme.background }]}
+            contentContainerStyle={{ paddingBottom: 30 }}
+        >
             {/* En-tête profil */}
-            <View style={styles.header}>
+            <View style={[styles.header, { backgroundColor: theme.card }]}>
+                <TouchableOpacity onPress={toggleTheme} style={styles.btn}>
+                    <Text style={{ color: theme.text }}>
+                        {isDark ? "☀ Mode clair" : "🌙 Mode sombre"}
+                    </Text>
+                </TouchableOpacity>
                 <Image
                     source={{
                         uri: "https://cdn-icons-png.flaticon.com/512/219/219970.png",
                     }}
                     style={styles.avatar}
                 />
-                <Text style={styles.name}>
+                <Text style={[styles.name, { color: theme.text }]}>
                     {user.prenom} {user.nom}
                 </Text>
-                <Text style={styles.email}>{user.username}</Text>
+
+                <Text style={[styles.email, { color: theme.textLight }]}>
+                    {user.username}
+                </Text>
+
                 <TouchableOpacity
-                    style={styles.btnAnnonces}
-                    onPress={() => navigation.navigate('ListAnnonces')}
+                    style={[styles.btnAnnonces, { color: "red" }]}
+                    onPress={() => navigation?.navigate?.("ListAnnonces")}
                 >
                     <Text style={styles.btnAnnoncesText}>Page accueil</Text>
                 </TouchableOpacity>
@@ -206,19 +230,24 @@ export default function ProfilScreen({ navigation }) {
             </View>
 
             {/* Infos simples */}
-            <View style={styles.infoSection}>
-                <Text style={styles.infoLabel}>Identifiant</Text>
-                <Text style={styles.infoValue}>{user.id}</Text>
-                <Text style={styles.infoLabel}>Nom</Text>
-                <Text style={styles.infoValue}>{user.nom}</Text>
-                <Text style={styles.infoLabel}>Prénom</Text>
-                <Text style={styles.infoValue}>{user.prenom}</Text>
-                <Text style={styles.infoLabel}>Courriel</Text>
-                <Text style={styles.infoValue}>{user.username}</Text>
+            <View style={[styles.infoSection, { backgroundColor: theme.card }]}>
+                <Text style={[styles.infoLabel, { color: theme.textLight }]}>Nom complet</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>
+                    {user.prenom} {user.nom}
+                </Text>
+
+                <Text style={[styles.infoLabel, { color: theme.textLight, marginTop: 12 }]}>Courriel</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>
+                    {user.username}
+                </Text>
+                <Text style={[styles.infoLabel, { color: theme.textLight, marginTop: 12 }]}>ID utilisateur</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>
+                    {user.id}
+                </Text>
             </View>
 
             {/* Section Mes annonces */}
-            <Text style={styles.sectionTitle}>Mes annonces</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Mes annonces</Text>
 
             {mesAnnonces.length === 0 ? (
                 <View style={styles.emptyBox}>
@@ -236,8 +265,7 @@ export default function ProfilScreen({ navigation }) {
             )}
 
             {/* Section Mes avis */}
-            <Text style={styles.sectionTitle}>Mes avis</Text>
-
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Mes avis</Text>
             {mesAvis.length === 0 ? (
                 <View style={styles.emptyBox}>
                     <Text style={styles.emptyText}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js';
 
 
 export default function MarketplaceHeader({
@@ -11,6 +12,8 @@ export default function MarketplaceHeader({
   onPressProgrammes = () => { },
 }) {
   const navigation = useNavigation();
+  const { theme, toggleTheme, isDark } = useTheme();
+
   const isActive = (tab) => active === tab;
   return (
     <View style={styles.container}>
@@ -19,6 +22,11 @@ export default function MarketplaceHeader({
         <Text style={styles.title}>Marketplace</Text>
 
         <View style={styles.rightIcons}>
+          <TouchableOpacity onPress={toggleTheme} style={styles.btn}>
+            <Text style={{ color: theme.text }}>
+              {isDark ? "Mode clair" : "Mode sombre"}
+            </Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="person-circle-outline" size={26} color="black" onPress={() => navigation.navigate('Profil')} />
           </TouchableOpacity>

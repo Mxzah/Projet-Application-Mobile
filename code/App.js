@@ -8,44 +8,47 @@ import PlaceholderVendre from './screens/items/PlaceholderVendre';
 import PlaceholderProgrammes from './screens/items/PlaceholderProgrammes';
 import ProgrammeCoursScreen from './screens/items/ProgrammeCoursScreen';
 import ProfilScreen from './screens/profil/ProfilScreen';
+import { ThemeProvider } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Connexion" screenOptions={{ headerShown: false }}>
-          <Stack.Screen
-            name="Connexion"
-            component={LoginScreen}
-          />
-          <Stack.Screen
-            name="Inscription"
-            component={SignUpScreen}
-          />
-          <Stack.Screen
-            name="ListAnnonces"
-            component={ListAnnoncesScreen}
-          />
-          <Stack.Screen
-            name="Vendre"
-            component={PlaceholderVendre}
-          />
-          <Stack.Screen
-            name="Programmes"
-            component={PlaceholderProgrammes}
-          />
-          <Stack.Screen
-            name="ProgrammeCours"
-            component={ProgrammeCoursScreen}
-          />
-          <Stack.Screen
-            name="Profil"
-            component={ProfilScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <ThemeProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="Connexion" screenOptions={{ headerShown: false }}>
+            <Stack.Screen
+              name="Connexion"
+              component={LoginScreen}
+            />
+            <Stack.Screen
+              name="Inscription"
+              component={SignUpScreen}
+            />
+            <Stack.Screen
+              name="ListAnnonces"
+              component={ListAnnoncesScreen}
+            />
+            <Stack.Screen
+              name="Vendre"
+              component={PlaceholderVendre}
+            />
+            <Stack.Screen
+              name="Programmes"
+              component={PlaceholderProgrammes}
+            />
+            <Stack.Screen
+              name="ProgrammeCours"
+              component={ProgrammeCoursScreen}
+            />
+            <Stack.Screen
+              name="Profil"
+              component={ProfilScreen}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
