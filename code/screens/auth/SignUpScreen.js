@@ -22,8 +22,10 @@ export default function SignUpScreen({ navigation }) {
         nom,
         prenom,
         courriel,
-        mot_de_passe: motDePasse,
+        mot_de_passe: motDePasse
       });
+
+
 
       setIsSubmitting(false);
 
