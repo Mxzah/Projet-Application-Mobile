@@ -8,7 +8,7 @@ export default function PlaceholderVendre({ navigation }) {
       <MarketplaceHeader
         active="Vendre"
         onPressVendre={() => { /* already here */ }}
-        onPressAcheter={() => navigation.navigate('ListeItems')}
+        onPressAcheter={() => navigation.navigate('ListAnnonces')}
         onPressProgrammes={() => navigation.navigate('Programmes')}
       />
       <View style={styles.centerContent}>
