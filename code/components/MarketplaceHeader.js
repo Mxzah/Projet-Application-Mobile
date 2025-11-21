@@ -12,7 +12,7 @@ export default function MarketplaceHeader({
   onPressProgrammes = () => { },
 }) {
   const navigation = useNavigation();
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme } = useTheme();
 
   const isActive = (tab) => active === tab;
   return (
@@ -22,11 +22,7 @@ export default function MarketplaceHeader({
         <Text style={styles.title}>Marketplace</Text>
 
         <View style={styles.rightIcons}>
-          <TouchableOpacity onPress={toggleTheme} style={styles.btn}>
-            <Text style={{ color: theme.text }}>
-              {isDark ? "Mode clair" : "Mode sombre"}
-            </Text>
-          </TouchableOpacity>
+
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="person-circle-outline" size={26} color="black" onPress={() => navigation.navigate('Profil')} />
           </TouchableOpacity>

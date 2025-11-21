@@ -149,9 +149,15 @@ export default function ProfilScreen({ navigation }) {
                     </Text>
                 )}
 
-                <Text style={[styles.avisMeta, { color: theme.textLight }]}>
-                    Le {date} • par l’utilisateur #{item.id_noteur}
-                </Text>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("ProfilPublic", { id_utilisateur: item.id_noteur })}
+                    activeOpacity={0.7}
+                >
+                    <Text style={[styles.avisMeta, { color: theme.textLight }]}>
+                        Le {date} • par l’utilisateur #{item.id_noteur}
+                    </Text>
+                </TouchableOpacity>
+
 
             </View>
         );

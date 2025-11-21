@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { View, Text, Button, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
+import { ThemeContext } from '@react-navigation/native';
+import { useTheme } from '/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js';
 
 const ANNONCES = [
   {
@@ -85,10 +87,12 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     navigation.setParams?.({ filteredCoursIds: [] });
     setSelectedCoursIds([]);
   };
+  const { theme } = useTheme();
+
 
   function renderCard({ item }) {
     return (
-      <TouchableOpacity style={styles.card} activeOpacity={0.8}>
+      <TouchableOpacity style={[styles.card, { backgroundColor: theme.background }]} activeOpacity={0.7}>
         <Image source={item.image} style={styles.image} resizeMode="cover" />
         <View style={styles.meta}>
           <Text style={styles.price}>{formatPrice(item.prix_demande)} $</Text>
