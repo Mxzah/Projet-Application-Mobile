@@ -6,6 +6,7 @@ import {
     Image,
     FlatList,
     TouchableOpacity,
+    ScrollView
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import authService from "../../services/Auth";
@@ -63,6 +64,37 @@ const ANNONCES = [
     },
 ];
 
+const AVIS = [
+    {
+        id_avis: 1,
+        note: 5,
+        commentaire: "Super vendeur, transaction rapide et produit conforme!",
+        date_avis: "2025-10-12T14:20:00Z",
+        id_utilisateur: 7,     // ✅ utilisateur qui reçoit l’avis (le profil)
+        id_noteur: 3,          // celui qui a donné l'avis
+        id_proposition: 12,
+    },
+    {
+        id_avis: 2,
+        note: 4,
+        commentaire: "Bonne communication, petit retard mais OK.",
+        date_avis: "2025-10-28T09:05:00Z",
+        id_utilisateur: 7,     // ✅ même user
+        id_noteur: 2,
+        id_proposition: 15,
+    },
+    {
+        id_avis: 3,
+        note: 2,
+        commentaire: "Article pas tout à fait comme décrit.",
+        date_avis: "2025-11-02T18:40:00Z",
+        id_utilisateur: 2,     // autre utilisateur
+        id_noteur: 1,
+        id_proposition: 18,
+    },
+];
+
+
 export default function ProfilScreen({ navigation }) {
     const [user, setUser] = useState(authService.currentUser);
 
@@ -77,6 +109,12 @@ export default function ProfilScreen({ navigation }) {
         return ANNONCES.filter((a) => a.id_utilisateur === user.id);
     }, [user]);
 
+    const mesAvis = useMemo(() => {
+        if (!user) return [];
+        return AVIS.filter(a => a.id_utilisateur === user.id);
+    }, [user]);
+
+
     if (!user) {
         return (
             <View style={styles.container}>
@@ -85,6 +123,30 @@ export default function ProfilScreen({ navigation }) {
             </View>
         );
     }
+
+    const renderAvis = ({ item }) => {
+        const date = new Date(item.date_avis).toLocaleDateString();
+
+        // étoiles simple
+        const stars = "★".repeat(item.note) + "☆".repeat(5 - item.note);
+
+        return (
+            <View style={styles.avisCard}>
+                <Text style={styles.avisStars}>{stars}</Text>
+
+                {item.commentaire ? (
+                    <Text style={styles.avisCommentaire}>{item.commentaire}</Text>
+                ) : (
+                    <Text style={styles.avisCommentaireMuted}>Aucun commentaire</Text>
+                )}
+
+                <Text style={styles.avisMeta}>
+                    Le {date} • par l’utilisateur #{item.id_noteur}
+                </Text>
+            </View>
+        );
+    };
+
 
     const renderAnnonce = ({ item }) => {
         const debut = new Date(item.date_debut).toLocaleDateString();
@@ -118,8 +180,10 @@ export default function ProfilScreen({ navigation }) {
         );
     };
 
+
+
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
             {/* En-tête profil */}
             <View style={styles.header}>
                 <Image
@@ -132,6 +196,13 @@ export default function ProfilScreen({ navigation }) {
                     {user.prenom} {user.nom}
                 </Text>
                 <Text style={styles.email}>{user.username}</Text>
+                <TouchableOpacity
+                    style={styles.btnAnnonces}
+                    onPress={() => navigation.navigate('ListAnnonces')}
+                >
+                    <Text style={styles.btnAnnoncesText}>Page accueil</Text>
+                </TouchableOpacity>
+
             </View>
 
             {/* Infos simples */}
@@ -160,11 +231,30 @@ export default function ProfilScreen({ navigation }) {
                     data={mesAnnonces}
                     keyExtractor={(item) => String(item.id_annonce)}
                     renderItem={renderAnnonce}
-                    contentContainerStyle={{ paddingBottom: 30 }}
+                    scrollEnabled={false}     // ✅ IMPORTANT
                 />
             )}
-        </View>
+
+            {/* Section Mes avis */}
+            <Text style={styles.sectionTitle}>Mes avis</Text>
+
+            {mesAvis.length === 0 ? (
+                <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>
+                        Tu n’as aucun avis pour l’instant.
+                    </Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={mesAvis}
+                    keyExtractor={(item) => String(item.id_avis)}
+                    renderItem={renderAvis}
+                    scrollEnabled={false}     // ✅ déjà fait
+                />
+            )}
+        </ScrollView>
     );
+
 }
 
 const styles = StyleSheet.create({
@@ -259,4 +349,40 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     emptyText: { color: "#666" },
+
+    avisCard: {
+        backgroundColor: "white",
+        marginHorizontal: 18,
+        marginVertical: 6,
+        padding: 14,
+        borderRadius: 12,
+        shadowColor: "#000",
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+
+    avisStars: {
+        fontSize: 16,
+        fontWeight: "800",
+        marginBottom: 6,
+    },
+
+    avisCommentaire: {
+        fontSize: 15,
+        color: "#222",
+    },
+
+    avisCommentaireMuted: {
+        fontSize: 15,
+        color: "#888",
+        fontStyle: "italic",
+    },
+
+    avisMeta: {
+        marginTop: 8,
+        fontSize: 12,
+        color: "#777",
+    },
+
 });
