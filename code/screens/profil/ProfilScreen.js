@@ -144,7 +144,6 @@ export default function ProfilScreen({ navigation }) {
                 <Text style={styles.infoValue}>{user.prenom}</Text>
                 <Text style={styles.infoLabel}>Courriel</Text>
                 <Text style={styles.infoValue}>{user.username}</Text>
-
             </View>
 
             {/* Section Mes annonces */}
