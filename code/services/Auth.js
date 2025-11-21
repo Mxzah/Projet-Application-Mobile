@@ -26,8 +26,9 @@ class AuthService {
                 id: response.lastInsertId,
                 username: credentials.courriel,
                 nom: credentials.nom,
-                prenom: credentials.prenom,
+                prenom: credentials.prenom
             });
+
         }
 
         return !!this.#currentUser;
@@ -49,17 +50,22 @@ class AuthService {
         ).then(r => r.json());
 
         if (response.success && response.data.length === 1) {
-            const user = response.data[0];
+            const u = response.data[0];
+
             this.#currentUser = new User({
-                id: user.id_utilisateur,
-                username: user.courriel
+                id: u.id_utilisateur,
+                username: u.courriel,
+                nom: u.nom,
+                prenom: u.prenom
             });
+
             return true;
         }
 
         this.#currentUser = null;
         return false;
     }
+
 
 
     // ...
