@@ -3,10 +3,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import LoginScreen from './screens/auth/LoginScreen';
 import SignUpScreen from './screens/auth/SignUpScreen';
-import ListAnnoncesScreen from './screens/items/ListAnnoncesScreen';
-import PlaceholderVendre from './screens/items/PlaceholderVendre';
-import PlaceholderProgrammes from './screens/items/PlaceholderProgrammes';
-import ProgrammeCoursScreen from './screens/items/ProgrammeCoursScreen';
+import ListAnnoncesScreen from './screens/annonces/ListAnnoncesScreen';
+import PlaceholderVendre from './screens/annonces/PlaceholderVendre';
+import PlaceholderProgrammes from './screens/annonces/PlaceholderProgrammes';
+import ProgrammeCoursScreen from './screens/annonces/ProgrammeCoursScreen';
 import ProfilScreen from './screens/profil/ProfilScreen';
 import { ThemeProvider } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
 

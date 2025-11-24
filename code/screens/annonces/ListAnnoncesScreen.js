@@ -2,59 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { View, Text, Button, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
-import { ThemeContext } from '@react-navigation/native';
 import { useTheme } from '/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js';
+import MarthaService from '../../services/Martha';
 
-const ANNONCES = [
-  {
-    id_annonce: 1,
-    titre: '2019 McLaren 570S',
-    lieu: 'Cafétéria',
-    description: 'Supercar en excellent état, faible kilométrage, carnet à jour.',
-    date_debut: '2025-10-01T08:00:00Z',
-    date_fin: '2025-12-31T23:59:59Z',
-    prix_demande: 298900.0,
-    id_cours: 1,
-    id_utilisateur: 101,
-    image: require('./assets/1.jpg'),
-  },
-  {
-    id_annonce: 2,
-    titre: 'Robe de bal',
-    lieu: 'Bibliothèque',
-    description: "Robe élégante, portée une seule fois, taille M.",
-    date_debut: '2025-10-25T12:00:00Z',
-    date_fin: '2025-12-30T23:59:59Z',
-    prix_demande: 180.0,
-    id_cours: 2,
-    id_utilisateur: 102,
-    image: require('./assets/2.jpg'),
-  },
-  {
-    id_annonce: 3,
-    titre: 'Scooter urbain',
-    lieu: 'Local 1132',
-    description: 'Scooter électrique parfait pour la ville, autonomie 40 km.',
-    date_debut: '2025-10-10T09:30:00Z',
-    date_fin: '2025-11-30T23:59:59Z',
-    prix_demande: 950.0,
-    id_cours: 3,
-    id_utilisateur: 103,
-    image: require('./assets/3.jpg'),
-  },
-  {
-    id_annonce: 4,
-    titre: 'Portrait encadré',
-    lieu: 'Local 2080',
-    description: 'Cadre 40x60 cm, parfait état, prêt à accrocher.',
-    date_debut: '2025-10-23T10:00:00Z',
-    date_fin: '2025-12-15T23:59:59Z',
-    prix_demande: 45.0,
-    id_cours: 4,
-    id_utilisateur: 104,
-    image: require('./assets/4.jpg'),
-  },
-];
+const marthaService = new MarthaService();
 
 function formatPrice(n) {
   try {
@@ -64,8 +15,48 @@ function formatPrice(n) {
   }
 }
 
+function resolveAnnonceImage(url) {
+  if (typeof url !== 'string' || url.length === 0) {
+    return { uri: 'https://via.placeholder.com/300?text=Annonce' };
+  }
+
+  if (url.startsWith('http')) {
+    return { uri: url };
+  }
+
+  const cleaned = url.replace(/^\.\//, '');
+  return { uri: `http://martha.jh.shawinigan.info/${cleaned}` };
+}
+
 export default function ListAnnoncesScreen({ navigation, route }) {
+  const [annonces, setAnnonces] = useState([]);
   const [selectedCoursIds, setSelectedCoursIds] = useState(() => route?.params?.filteredCoursIds ?? []);
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    let isMounted = true;
+    marthaService
+      .getAnnonces()
+      .then((data) => {
+        if (!isMounted) return;
+        console.log('Annonces', data);
+        const normalized = (data?.data ?? []).map((annonce) => ({
+          ...annonce,
+          image: resolveAnnonceImage(annonce.url_photo),
+        }));
+        setAnnonces(normalized);
+      })
+      .catch((error) => {
+        console.warn('Impossible de charger les annonces', error);
+        if (isMounted) {
+          setAnnonces([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const incoming = route?.params?.filteredCoursIds;
@@ -75,9 +66,9 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   }, [route?.params?.filteredCoursIds]);
 
   const filteredAnnonces = useMemo(() => {
-    if (!selectedCoursIds?.length) return ANNONCES;
-    return ANNONCES.filter((annonce) => selectedCoursIds.includes(annonce.id_cours));
-  }, [selectedCoursIds]);
+    if (!selectedCoursIds?.length) return annonces;
+    return annonces.filter((annonce) => selectedCoursIds.includes(annonce.id_cours));
+  }, [annonces, selectedCoursIds]);
 
   const handleOpenProgrammes = () => {
     navigation.navigate('Programmes', { selectedCoursIds });
@@ -87,8 +78,6 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     navigation.setParams?.({ filteredCoursIds: [] });
     setSelectedCoursIds([]);
   };
-  const { theme } = useTheme();
-
 
   function renderCard({ item }) {
     return (
