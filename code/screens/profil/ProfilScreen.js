@@ -13,7 +13,6 @@ import authService from "../../services/Auth";
 import { useTheme } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
 import MarthaService from "../../services/MarthaService.js";
 
-// --- Tes annonces mock ---
 const ANNONCES = [];
 
 export default function ProfilScreen({ navigation, route }) {
