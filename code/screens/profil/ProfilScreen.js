@@ -11,100 +11,55 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import authService from "../../services/Auth";
 import { useTheme } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
+import MarthaService from "../../services/MarthaService.js";
+
+
+
+
 
 // --- Tes annonces mock ---
-const ANNONCES = [
-    {
-        id_annonce: 1,
-        titre: "2019 McLaren 570S",
-        lieu: "Cafétéria",
-        description:
-            "Supercar en excellent état, faible kilométrage, carnet à jour.",
-        date_debut: "2025-10-01T08:00:00Z",
-        date_fin: "2025-12-31T23:59:59Z",
-        prix_demande: 298900.0,
-        id_cours: 1,
-        id_utilisateur: 7,
-        image: require("/home/etd/Projet-Application-Mobile/code/screens/items/assets/1.jpg"),
-    },
-    {
-        id_annonce: 2,
-        titre: "Robe de bal",
-        lieu: "Bibliothèque",
-        description: "Robe élégante, portée une seule fois, taille M.",
-        date_debut: "2025-10-25T12:00:00Z",
-        date_fin: "2025-12-30T23:59:59Z",
-        prix_demande: 180.0,
-        id_cours: 2,
-        id_utilisateur: 7,
-        image: require("/home/etd/Projet-Application-Mobile/code/screens/items/assets/2.jpg"),
-    },
-    {
-        id_annonce: 3,
-        titre: "Scooter urbain",
-        lieu: "Local 1132",
-        description: "Scooter électrique parfait pour la ville, autonomie 40 km.",
-        date_debut: "2025-10-10T09:30:00Z",
-        date_fin: "2025-11-30T23:59:59Z",
-        prix_demande: 950.0,
-        id_cours: 3,
-        id_utilisateur: 103,
-        image: require("/home/etd/Projet-Application-Mobile/code/screens/items/assets/3.jpg"),
-    },
-    {
-        id_annonce: 4,
-        titre: "Portrait encadré",
-        lieu: "Local 2080",
-        description: "Cadre 40x60 cm, parfait état, prêt à accrocher.",
-        date_debut: "2025-10-23T10:00:00Z",
-        date_fin: "2025-12-15T23:59:59Z",
-        prix_demande: 45.0,
-        id_cours: 4,
-        id_utilisateur: 104,
-        image: require("/home/etd/Projet-Application-Mobile/code/screens/items/assets/4.jpg"),
-    },
-];
-
-const AVIS = [
-    {
-        id_avis: 1,
-        note: 5,
-        commentaire: "Super vendeur, transaction rapide et produit conforme!",
-        date_avis: "2025-10-12T14:20:00Z",
-        id_utilisateur: 7,     // ✅ utilisateur qui reçoit l’avis (le profil)
-        id_noteur: 3,          // celui qui a donné l'avis
-        id_proposition: 12,
-    },
-    {
-        id_avis: 2,
-        note: 4,
-        commentaire: "Bonne communication, petit retard mais OK.",
-        date_avis: "2025-10-28T09:05:00Z",
-        id_utilisateur: 7,     // ✅ même user
-        id_noteur: 2,
-        id_proposition: 15,
-    },
-    {
-        id_avis: 3,
-        note: 2,
-        commentaire: "Article pas tout à fait comme décrit.",
-        date_avis: "2025-11-02T18:40:00Z",
-        id_utilisateur: 2,     // autre utilisateur
-        id_noteur: 1,
-        id_proposition: 18,
-    },
-];
+const ANNONCES = [];
 
 
-export default function ProfilScreen({ navigation }) {
+
+
+export default function ProfilScreen({ navigation, route }) {
+
     const [user, setUser] = useState(authService.currentUser);
+
+    const [mesAvis, setMesAvis] = useState([]);
+
+    const idProfil = route?.params?.id_utilisateur;
+    // si quelqu’un clique sur un avis → idProfil existe
+    // sinon → undefined
 
     useFocusEffect(
         useCallback(() => {
-            setUser(authService.currentUser);
-        }, [])
-    );
+            async function loadProfilEtAvis() {
+                const idACharger = idProfil ?? authService.currentUser?.id;
 
+                if (!idACharger) {
+                    setUser(null);
+                    setMesAvis([]);
+                    return;
+                }
+
+                // 1) charger le bon user
+                if (idProfil) {
+                    const autreUser = await MarthaService.getUserById(idACharger);
+                    setUser(autreUser);
+                } else {
+                    setUser(authService.currentUser);
+                }
+
+                // 2) charger SES avis (pas toujours ceux du connecté)
+                const avis = await MarthaService.getAvisByUser(idACharger);
+                setMesAvis(avis);
+            }
+
+            loadProfilEtAvis();
+        }, [idProfil])
+    );
     const { theme, toggleTheme, isDark } = useTheme();
 
     const mesAnnonces = useMemo(() => {
@@ -112,10 +67,6 @@ export default function ProfilScreen({ navigation }) {
         return ANNONCES.filter((a) => a.id_utilisateur === user.id);
     }, [user]);
 
-    const mesAvis = useMemo(() => {
-        if (!user) return [];
-        return AVIS.filter(a => a.id_utilisateur === user.id);
-    }, [user]);
 
 
     if (!user) {
@@ -128,40 +79,32 @@ export default function ProfilScreen({ navigation }) {
     }
 
     const renderAvis = ({ item }) => {
-        const date = new Date(item.date_avis).toLocaleDateString();
-
         const stars = "★".repeat(item.note) + "☆".repeat(5 - item.note);
+        const dateTexte = new Date(item.date_avis).toLocaleDateString();
 
         return (
             <View style={[styles.avisCard, { backgroundColor: theme.card }]}>
+                <Text style={[styles.avisStars, { color: theme.text }]}>{stars}</Text>
 
-                <Text style={[styles.avisStars, { color: theme.text }]}>
-                    {stars}
+                <Text style={[styles.avisCommentaire, { color: theme.text }]}>
+                    {item.commentaire || "Aucun commentaire"}
                 </Text>
 
-                {item.commentaire ? (
-                    <Text style={[styles.avisCommentaire, { color: theme.text }]}>
-                        {item.commentaire}
-                    </Text>
-                ) : (
-                    <Text style={[styles.avisCommentaireMuted, { color: theme.textLight }]}>
-                        Aucun commentaire
-                    </Text>
-                )}
-
                 <TouchableOpacity
-                    onPress={() => navigation.navigate("ProfilPublic", { id_utilisateur: item.id_noteur })}
-                    activeOpacity={0.7}
+                    onPress={() =>
+                        navigation.push("Profil", { id_utilisateur: item.id_noteur })
+                    }
                 >
-                    <Text style={[styles.avisMeta, { color: theme.textLight }]}>
-                        Le {date} • par l’utilisateur #{item.id_noteur}
+                    <Text style={[styles.avisMeta, { color: theme.primary }]}>
+                        Le {dateTexte} • par {item.noteur_prenom} {item.noteur_nom}
                     </Text>
+
                 </TouchableOpacity>
-
-
             </View>
         );
     };
+
+
 
     const renderAnnonce = ({ item }) => {
         const debut = new Date(item.date_debut).toLocaleDateString();
@@ -223,7 +166,7 @@ export default function ProfilScreen({ navigation }) {
                 </Text>
 
                 <Text style={[styles.email, { color: theme.textLight }]}>
-                    {user.username}
+                    {user.courriel ?? user.username}
                 </Text>
 
                 <TouchableOpacity
@@ -244,21 +187,21 @@ export default function ProfilScreen({ navigation }) {
 
                 <Text style={[styles.infoLabel, { color: theme.textLight, marginTop: 12 }]}>Courriel</Text>
                 <Text style={[styles.infoValue, { color: theme.text }]}>
-                    {user.username}
+                    {user.courriel ?? user.username}
                 </Text>
                 <Text style={[styles.infoLabel, { color: theme.textLight, marginTop: 12 }]}>ID utilisateur</Text>
                 <Text style={[styles.infoValue, { color: theme.text }]}>
-                    {user.id}
+                    {user.id_utilisateur ?? user.id}
                 </Text>
             </View>
 
             {/* Section Mes annonces */}
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Mes annonces</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Annonces</Text>
 
             {mesAnnonces.length === 0 ? (
-                <View style={styles.emptyBox}>
+                <View style={[styles.emptyBox, { backgroundColor: theme.card }]}>
                     <Text style={styles.emptyText}>
-                        Tu n’as aucune annonce pour l’instant.
+                        Aucune annonce pour l’instant.
                     </Text>
                 </View>
             ) : (
@@ -271,11 +214,11 @@ export default function ProfilScreen({ navigation }) {
             )}
 
             {/* Section Mes avis */}
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Mes avis</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Avis</Text>
             {mesAvis.length === 0 ? (
-                <View style={styles.emptyBox}>
+                <View style={[styles.emptyBox, { backgroundColor: theme.card }]}>
                     <Text style={styles.emptyText}>
-                        Tu n’as aucun avis pour l’instant.
+                        Aucun avis pour l’instant.
                     </Text>
                 </View>
             ) : (
