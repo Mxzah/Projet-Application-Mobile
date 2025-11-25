@@ -153,10 +153,6 @@ export default function ProfilScreen({ navigation, route }) {
         );
     };
 
-
-
-
-
     return (
         <ScrollView
             style={styles.container}
