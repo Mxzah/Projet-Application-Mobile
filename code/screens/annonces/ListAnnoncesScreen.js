@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, Button, FlatList, Image, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, Button, FlatList, Image, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
-import { useTheme } from '/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js';
 import MarthaService from '../../services/Martha';
+import { geAnnoncestStyles } from '../../styles';
+import { useTheme } from "../../context/ThemeContext";
 
 const marthaService = new MarthaService();
+
+
 
 function formatPrice(n) {
   try {
@@ -36,6 +39,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   const [offerDate, setOfferDate] = useState('');
   const [offerPlace, setOfferPlace] = useState('');
   const { theme } = useTheme();
+  const styles = geAnnoncestStyles(theme);
 
   useEffect(() => {
     let isMounted = true;
@@ -111,7 +115,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   function renderCard({ item }) {
     return (
       <TouchableOpacity
-        style={[styles.card, { backgroundColor: theme.background }]}
+        style={styles.card}
         activeOpacity={0.7}
         onPress={() => openAnnonceDialog(item)}
       >
@@ -126,7 +130,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <MarketplaceHeader
         active="Acheter"
         onPressVendre={() => navigation.navigate('Vendre')}
@@ -148,6 +152,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
       )}
 
       <FlatList
+
         data={filteredAnnonces}
         keyExtractor={(it) => String(it.id_annonce)}
         renderItem={renderCard}
@@ -195,6 +200,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
                   <TextInput
                     style={styles.dialogInput}
                     placeholder="Date de la vente (AAAA-MM-JJ)"
+                    placeholderTextColor="#888"
                     value={offerDate}
                     onChangeText={setOfferDate}
                   />
@@ -206,7 +212,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
                   />
 
                   <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
-                    <Text style={styles.offerButtonLabel}>Faire une offre</Text>
+                    <Text style={styles.offerButtonLabel}>FAIRE UNE OFFRE</Text>
                   </TouchableOpacity>
                   <Button title="Fermer" onPress={closeAnnonceDialog} />
                 </View>
@@ -219,140 +225,3 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
-  grid: {
-    paddingHorizontal: 8,
-    paddingBottom: 16,
-  },
-  row: {
-    gap: 8,
-    paddingVertical: 6,
-  },
-  card: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
-  },
-  image: {
-    width: '100%',
-    aspectRatio: 1,
-    backgroundColor: '#f3f4f6',
-  },
-  meta: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
-  price: {
-    fontWeight: '700',
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  title: {
-    fontSize: 12,
-    color: '#111827',
-  },
-  place: {
-    fontSize: 11,
-    color: '#6b7280',
-    marginTop: 2,
-  },
-  sectionHeader: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  sectionTitle: {
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  filtersBanner: {
-    marginHorizontal: 12,
-    marginBottom: 8,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#d1d5db',
-    backgroundColor: '#f9fafb',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  filtersText: {
-    fontWeight: '600',
-    color: '#111827',
-  },
-  empty: {
-    textAlign: 'center',
-    color: '#6b7280',
-    paddingVertical: 40,
-  },
-  dialogOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  dialogCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    maxHeight: '90%',
-  },
-  dialogImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  dialogTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  dialogDescription: {
-    marginTop: 6,
-    color: '#4b5563',
-    lineHeight: 20,
-  },
-  dialogRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  dialogLabel: {
-    color: '#6b7280',
-    fontWeight: '600',
-  },
-  dialogValue: {
-    color: '#111827',
-    fontWeight: '700',
-  },
-  dialogForm: {
-    marginTop: 16,
-    gap: 12,
-  },
-  dialogFormTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  dialogInput: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  offerButton: {
-    backgroundColor: '#1877f2',
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  offerButtonLabel: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-});

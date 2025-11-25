@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js';
+import { getHeaderStyles } from "../styles";
+
 
 
 export default function MarketplaceHeader({
@@ -13,6 +15,7 @@ export default function MarketplaceHeader({
 }) {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const styles = getHeaderStyles(theme);
 
   const isActive = (tab) => active === tab;
   return (
@@ -24,10 +27,10 @@ export default function MarketplaceHeader({
         <View style={styles.rightIcons}>
 
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="person-circle-outline" size={26} color="black" onPress={() => navigation.navigate('Profil')} />
+            <Ionicons name="person-circle-outline" size={26} color={theme.text} onPress={() => navigation.navigate('Profil')} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="search-outline" size={22} color="black" />
+            <Ionicons name="search-outline" size={22} color={theme.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -51,48 +54,3 @@ export default function MarketplaceHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingTop: 8,
-    paddingHorizontal: 12,
-    paddingBottom: 8,
-    backgroundColor: 'white',
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-  },
-  rightIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconButton: {
-    marginLeft: 12,
-  },
-  tabsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  tab: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    marginRight: 8,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  activeTab: {
-    backgroundColor: '#e6f0ff', // light blue pill like the screenshot
-  },
-  activeTabText: {
-    color: '#1877f2', // Facebook blue
-  },
-});

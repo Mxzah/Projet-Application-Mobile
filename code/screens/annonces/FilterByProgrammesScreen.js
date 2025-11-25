@@ -4,11 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
 import MarthaService from '../../services/Martha';
+import { getProgrammesStyles } from '../../styles';
+import { useTheme } from "../../context/ThemeContext";
 
 const marthaService = new MarthaService();
 
 export default function FilterByProgrammesScreen({ navigation, route }) {
-  
+  const { theme } = useTheme();
+  const styles = getProgrammesStyles(theme);
+
   const [programmes, setProgrammes] = useState([]);
   const [cours, setCours] = useState([]);
 
@@ -123,7 +127,7 @@ export default function FilterByProgrammesScreen({ navigation, route }) {
     <SafeAreaView style={styles.container}>
       <MarketplaceHeader
         active="Programmes"
-        onPressVendre={() => navigation.navigate('Vendre')} 
+        onPressVendre={() => navigation.navigate('Vendre')}
         onPressAcheter={() => navigation.navigate('ListAnnonces')}
         onPressProgrammes={() => { /* already here */ }}
       />
@@ -144,105 +148,3 @@ export default function FilterByProgrammesScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  listHeader: {
-    paddingHorizontal: 12,
-    paddingTop: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  listContent: {
-    paddingHorizontal: 12,
-    paddingBottom: 16,
-  },
-  programCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
-    padding: 12,
-    marginBottom: 10,
-  },
-  programHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkWrap: {
-    width: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  uncheckedCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: '#e5e7eb',
-    backgroundColor: 'transparent',
-  },
-  programName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-    flex: 1,
-    paddingRight: 8,
-  },
-  sessionBadge: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1877f2',
-    backgroundColor: '#e6f0ff',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-    alignSelf: 'flex-start',
-  },
-  programDesc: {
-    marginTop: 6,
-    fontSize: 13,
-    color: '#4b5563',
-    lineHeight: 18,
-  },
-  coursList: {
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e5e7eb',
-  },
-  coursRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#f0f2f5',
-  },
-  coursCode: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1877f2',
-    backgroundColor: '#e6f0ff',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-    marginRight: 10,
-    alignSelf: 'flex-start',
-  },
-  coursName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  coursDesc: {
-    marginTop: 2,
-    fontSize: 12,
-    color: '#4b5563',
-    lineHeight: 16,
-  },
-});

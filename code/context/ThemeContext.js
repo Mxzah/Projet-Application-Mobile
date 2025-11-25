@@ -6,20 +6,29 @@ export const ThemeProvider = ({ children }) => {
     const [isDark, setIsDark] = useState(false);
 
     const lightTheme = {
-        background: "#f4f4f4",
-        card: "white",
-        text: "#222",
-        textLight: "#666",
+        background: "#ffffff",
+        card: "#ffffff",
+        text: "#111827",
+        textLight: "#6b7280",
+        border: "#e5e7eb",
         primary: "#1877f2",
+        primaryLight: "#e6f0ff",
+        inputBackground: "#f9fafb",
+        // ...
     };
 
     const darkTheme = {
-        background: "#1a1a1a",
-        card: "#2a2a2a",
-        text: "white",
-        textLight: "#cccccc",
-        primary: "#4d9bf0",
+        background: "#020617",
+        card: "#0b1220",
+        text: "#e5e7eb",
+        textLight: "#9ca3af",
+        border: "#1f2937",
+        primary: "#60a5fa",
+        primaryLight: "#1d3b66",
+        inputBackground: "#1f2937",
+        // ...
     };
+
 
     const theme = isDark ? darkTheme : lightTheme;
 

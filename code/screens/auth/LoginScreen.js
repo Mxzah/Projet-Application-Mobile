@@ -62,12 +62,18 @@ export default function LoginScreen({ navigation }) {
       {loading ? (
         <ActivityIndicator size="large" />
       ) : (
-        <Button title="Se connecter" onPress={handleLogin} />
+        <View style={{ marginBottom: 12 }}>
+          <Button title="Se connecter" onPress={handleLogin} />
+        </View>
       )}
-      <Button title="Créer un compte" onPress={() => navigation.navigate('Inscription')} />
+
+      <View style={{ marginTop: 4 }}>
+        <Button
+          title="Créer un compte"
+          onPress={() => navigation.navigate("Inscription")}
+        />
+      </View>
     </View>
-
-
   );
 }
 

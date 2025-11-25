@@ -12,8 +12,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import authService from "../../services/Auth";
 import { useTheme } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
 import MarthaService from "../../services/Martha";
+import { getProfileStyles } from "../../styles";
 
-const ANNONCES = [];
 const marthaService = new MarthaService();
 
 export default function ProfilScreen({ navigation, route }) {
@@ -21,6 +21,7 @@ export default function ProfilScreen({ navigation, route }) {
     const [user, setUser] = useState(authService.currentUser);
 
     const [mesAvis, setMesAvis] = useState([]);
+    const [mesAnnonces, setMesAnnonces] = useState([]);
 
     const idProfil = route?.params?.id_utilisateur;
     // si quelqu’un clique sur un avis → idProfil existe
@@ -48,17 +49,18 @@ export default function ProfilScreen({ navigation, route }) {
                 // 2) charger SES avis (pas toujours ceux du connecté)
                 const avis = await marthaService.getAvisByUser(idACharger);
                 setMesAvis(avis);
+
+                const annonces = await marthaService.getAnnoncesByUser(idACharger);
+                setMesAnnonces(annonces);
             }
 
             loadProfilEtAvis();
         }, [idProfil])
     );
     const { theme, toggleTheme, isDark } = useTheme();
+    const styles = getProfileStyles(theme);
 
-    const mesAnnonces = useMemo(() => {
-        if (!user) return [];
-        return ANNONCES.filter((a) => a.id_utilisateur === user.id);
-    }, [user]);
+
 
 
 
@@ -100,35 +102,52 @@ export default function ProfilScreen({ navigation, route }) {
 
 
     const renderAnnonce = ({ item }) => {
-        const debut = new Date(item.date_debut).toLocaleDateString();
-        const fin = new Date(item.date_fin).toLocaleDateString();
+        // ✅ sécuriser les dates
+        const debut = item.date_debut
+            ? new Date(item.date_debut).toLocaleDateString()
+            : "";
+        const fin = item.date_fin
+            ? new Date(item.date_fin).toLocaleDateString()
+            : "";
+
+        // ✅ convertir le prix en number proprement
+        const prixNumber = Number(item.prix_demande);
+        const prixTexte = Number.isFinite(prixNumber)
+            ? `${prixNumber.toFixed(2)} $`
+            : `${item.prix_demande ?? ""} $`;
+
+        // ✅ sécuriser l'URL de l'image
+        const photoUri = item.url_photo
+            ? `http://martha.jh.shawinigan.info/${item.url_photo.replace(/^\.\//, "")}`
+            : "https://via.placeholder.com/200x200?text=Annonce";
 
         return (
             <TouchableOpacity
-                style={[styles.annonceCard, { backgroundColor: theme.card }]}
-                onPress={() => navigation.navigate("DetailsAnnonce", { annonce: item })}
+                style={styles.annonceCard}
                 activeOpacity={0.85}
+                onPress={() => navigation.navigate("DetailsAnnonce", { annonce: item })}
             >
-                <Image source={item.image} style={styles.annonceImage} />
+                <Image
+                    source={{ uri: photoUri }}
+                    style={styles.annonceImage}
+                />
 
-                <View style={{ flex: 1 }}>
-
-                    <Text style={[styles.annonceTitre, { color: theme.text }]} numberOfLines={1}>
+                <View style={styles.annonceContent}>
+                    <Text style={styles.annonceTitre} numberOfLines={1}>
                         {item.titre}
                     </Text>
 
-                    <Text style={[styles.annonceLieu, { color: theme.textLight }]}>
+                    <Text style={styles.annonceLieu}>
                         {item.lieu}
                     </Text>
 
-                    <Text style={[styles.annoncePrix, { color: theme.text }]}>
-                        {item.prix_demande.toFixed(2)} $
+                    <Text style={styles.annoncePrix}>
+                        {prixTexte}
                     </Text>
 
-                    <Text style={[styles.annonceDates, { color: theme.textLight }]}>
-                        {debut} → {fin}
+                    <Text style={styles.annonceDates}>
+                        {debut && fin ? `${debut} → ${fin}` : ""}
                     </Text>
-
                 </View>
             </TouchableOpacity>
         );
@@ -136,223 +155,96 @@ export default function ProfilScreen({ navigation, route }) {
 
 
 
+
+
     return (
         <ScrollView
-            style={[styles.container, { backgroundColor: theme.background }]}
-            contentContainerStyle={{ paddingBottom: 30 }}
+            style={styles.container}
+            contentContainerStyle={styles.scrollContent}
         >
-            {/* En-tête profil */}
-            <View style={[styles.header, { backgroundColor: theme.card }]}>
-                <TouchableOpacity onPress={toggleTheme} style={styles.btn}>
-                    <Text style={{ color: theme.text }}>
+            {/* Header profil */}
+            <View style={styles.header}>
+                <TouchableOpacity
+                    onPress={toggleTheme}
+                    style={styles.themeToggleButton}
+                >
+                    <Text style={styles.themeToggleText}>
                         {isDark ? "☀ Mode clair" : "🌙 Mode sombre"}
                     </Text>
                 </TouchableOpacity>
+
                 <Image
                     source={{
                         uri: "https://cdn-icons-png.flaticon.com/512/219/219970.png",
                     }}
                     style={styles.avatar}
                 />
-                <Text style={[styles.name, { color: theme.text }]}>
+                <Text style={styles.name}>
                     {user.prenom} {user.nom}
                 </Text>
-
-                <Text style={[styles.email, { color: theme.textLight }]}>
+                <Text style={styles.email}>
                     {user.courriel ?? user.username}
                 </Text>
 
                 <TouchableOpacity
-                    style={[styles.btnAnnonces, { color: "red" }]}
-                    onPress={() => navigation?.navigate?.("ListAnnonces")}
+                    style={styles.btnAnnonces}
+                    onPress={() => navigation.navigate("ListAnnonces")}
                 >
                     <Text style={styles.btnAnnoncesText}>Page accueil</Text>
                 </TouchableOpacity>
-
             </View>
 
-            {/* Infos simples */}
-            <View style={[styles.infoSection, { backgroundColor: theme.card }]}>
-                <Text style={[styles.infoLabel, { color: theme.textLight }]}>Nom complet</Text>
-                <Text style={[styles.infoValue, { color: theme.text }]}>
+            {/* Infos de base */}
+            <View style={styles.infoSection}>
+                <Text style={styles.infoLabel}>Nom complet</Text>
+                <Text style={styles.infoValue}>
                     {user.prenom} {user.nom}
                 </Text>
 
-                <Text style={[styles.infoLabel, { color: theme.textLight, marginTop: 12 }]}>Courriel</Text>
-                <Text style={[styles.infoValue, { color: theme.text }]}>
+                <Text style={[styles.infoLabel, { marginTop: 12 }]}>
+                    Courriel
+                </Text>
+                <Text style={styles.infoValue}>
                     {user.courriel ?? user.username}
                 </Text>
-                <Text style={[styles.infoLabel, { color: theme.textLight, marginTop: 12 }]}>ID utilisateur</Text>
-                <Text style={[styles.infoValue, { color: theme.text }]}>
+
+                <Text style={[styles.infoLabel, { marginTop: 12 }]}>
+                    ID utilisateur
+                </Text>
+                <Text style={styles.infoValue}>
                     {user.id_utilisateur ?? user.id}
                 </Text>
             </View>
 
-            {/* Section Mes annonces */}
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Annonces</Text>
-
+            {/* Annonces */}
+            <Text style={styles.sectionTitle}>Annonces</Text>
             {mesAnnonces.length === 0 ? (
-                <View style={[styles.emptyBox, { backgroundColor: theme.card }]}>
-                    <Text style={styles.emptyText}>
-                        Aucune annonce pour l’instant.
-                    </Text>
+                <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>Aucune annonce pour l’instant.</Text>
                 </View>
             ) : (
                 <FlatList
                     data={mesAnnonces}
                     keyExtractor={(item) => String(item.id_annonce)}
                     renderItem={renderAnnonce}
-                    scrollEnabled={false}     // ✅ IMPORTANT
+                    scrollEnabled={false}
                 />
             )}
 
-            {/* Section Mes avis */}
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Avis</Text>
+            {/* Avis */}
+            <Text style={styles.sectionTitle}>Avis</Text>
             {mesAvis.length === 0 ? (
-                <View style={[styles.emptyBox, { backgroundColor: theme.card }]}>
-                    <Text style={styles.emptyText}>
-                        Aucun avis pour l’instant.
-                    </Text>
+                <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>Aucun avis pour l’instant.</Text>
                 </View>
             ) : (
                 <FlatList
                     data={mesAvis}
                     keyExtractor={(item) => String(item.id_avis)}
                     renderItem={renderAvis}
-                    scrollEnabled={false}     // ✅ déjà fait
+                    scrollEnabled={false}
                 />
             )}
         </ScrollView>
     );
-
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#f4f4f4" },
-
-    // Header
-    header: {
-        backgroundColor: "white",
-        paddingVertical: 30,
-        paddingHorizontal: 20,
-        alignItems: "center",
-        borderBottomLeftRadius: 25,
-        borderBottomRightRadius: 25,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 5,
-    },
-    avatar: { width: 85, height: 85, borderRadius: 50, marginBottom: 12 },
-    name: { fontSize: 24, fontWeight: "bold", color: "#222" },
-    email: { fontSize: 14, color: "#666", marginTop: 4 },
-
-    // Infos
-    infoSection: {
-        backgroundColor: "white",
-        padding: 16,
-        marginTop: 15,
-        marginHorizontal: 18,
-        borderRadius: 12,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 5,
-        elevation: 2,
-    },
-    infoLabel: { fontSize: 14, fontWeight: "600", color: "#777", marginBottom: 4 },
-    infoValue: { fontSize: 16, color: "#222" },
-
-    // Mes annonces
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "800",
-        marginTop: 20,
-        marginBottom: 8,
-        marginHorizontal: 18,
-        color: "#222",
-    },
-
-    annonceCard: {
-        flexDirection: "row",
-        backgroundColor: "white",
-        marginHorizontal: 18,
-        marginVertical: 8,
-        borderRadius: 14,
-        overflow: "hidden",
-        shadowColor: "#000",
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-        elevation: 2,
-    },
-    annonceImage: {
-        width: 90,
-        height: 90,
-        marginRight: 12,
-    },
-    annonceTitre: {
-        fontSize: 16,
-        fontWeight: "700",
-        marginTop: 8,
-        marginRight: 8,
-    },
-    annonceLieu: {
-        fontSize: 13,
-        color: "#666",
-        marginTop: 2,
-    },
-    annoncePrix: {
-        fontSize: 15,
-        fontWeight: "800",
-        marginTop: 6,
-    },
-    annonceDates: {
-        fontSize: 12,
-        color: "#888",
-        marginTop: 4,
-        marginBottom: 8,
-    },
-
-    emptyBox: {
-        backgroundColor: "white",
-        marginHorizontal: 18,
-        padding: 16,
-        borderRadius: 12,
-    },
-    emptyText: { color: "#666" },
-
-    avisCard: {
-        backgroundColor: "white",
-        marginHorizontal: 18,
-        marginVertical: 6,
-        padding: 14,
-        borderRadius: 12,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-
-    avisStars: {
-        fontSize: 16,
-        fontWeight: "800",
-        marginBottom: 6,
-    },
-
-    avisCommentaire: {
-        fontSize: 15,
-        color: "#222",
-    },
-
-    avisCommentaireMuted: {
-        fontSize: 15,
-        color: "#888",
-        fontStyle: "italic",
-    },
-
-    avisMeta: {
-        marginTop: 8,
-        fontSize: 12,
-        color: "#777",
-    },
-
-});

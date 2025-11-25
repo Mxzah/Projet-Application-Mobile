@@ -16,11 +16,14 @@ import authService from '../../services/Auth';
 import MarthaService from '../../services/Martha';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
+import { getCreateAnnonceStyles } from '../../styles';
+import { useTheme } from "../../context/ThemeContext";
 
 const marthaService = new MarthaService();
 
 export default function VendreProduitScreen({ navigation }) {
-
+  const { theme } = useTheme();
+  const styles = getCreateAnnonceStyles(theme);
 
   function handleMettreEnVente() {
     const userId = authService.currentUser?.id ?? '';
@@ -128,6 +131,7 @@ export default function VendreProduitScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Ex. MacBook Pro 2022"
+                placeholderTextColor="#888"
                 value={titre}
                 onChangeText={setTitre}
               />
@@ -138,6 +142,7 @@ export default function VendreProduitScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Ex. Bloc B - Local 2103"
+                placeholderTextColor="#888"
                 value={lieu}
                 onChangeText={setLieu}
               />
@@ -148,6 +153,7 @@ export default function VendreProduitScreen({ navigation }) {
               <TextInput
                 style={[styles.input, styles.textarea]}
                 placeholder="Ajoutez les détails importants"
+                placeholderTextColor="#888"
                 value={description}
                 onChangeText={setDescription}
                 multiline
@@ -159,6 +165,7 @@ export default function VendreProduitScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="AAAA-MM-JJ"
+                placeholderTextColor="#888"
                 value={dateFin}
                 onChangeText={setDateFin}
               />
@@ -169,6 +176,7 @@ export default function VendreProduitScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Ex. 199.99"
+                placeholderTextColor="#888"
                 keyboardType="numeric"
                 value={prix}
                 onChangeText={setPrix}
@@ -182,7 +190,7 @@ export default function VendreProduitScreen({ navigation }) {
                   selectedValue={coursSelection}
                   onValueChange={(value) => setCoursSelection(value)}
                 >
-                  <Picker.Item label="Sélectionnez un cours" value="" />
+                  <Picker.Item label="Sélectionnez un cours" value="" style={{ color: '#888' }} />
                   {coursOptions.map((item) => (
                     <Picker.Item
                       key={item.id_cours}
@@ -204,109 +212,3 @@ export default function VendreProduitScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContent: {
-    padding: 20,
-  },
-  formCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 4,
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
-    marginBottom: 20,
-  },
-  field: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    color: '#374151',
-    marginBottom: 6,
-    fontWeight: '600',
-  },
-  input: {
-    width: '100%',
-    backgroundColor: '#f9fafb',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#111827',
-  },
-  textarea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  pickerWrapper: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: '#f9fafb',
-  },
-  submitButton: {
-    marginTop: 6,
-    backgroundColor: '#1877f2',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  submitLabel: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
-    letterSpacing: 0.3,
-  },
-  preview: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 12,
-    backgroundColor: '#e5e7eb',
-  },
-  previewPlaceholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  previewPlaceholderText: {
-    color: '#6b7280',
-    fontWeight: '600',
-  },
-  cameraButton: {
-    backgroundColor: '#111827',
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  cameraButtonLabel: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  helperText: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-});
