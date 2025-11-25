@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, Button, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Button, FlatList, Image, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
 import { useTheme } from '/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js';
@@ -31,6 +31,10 @@ function resolveAnnonceImage(url) {
 export default function ListAnnoncesScreen({ navigation, route }) {
   const [annonces, setAnnonces] = useState([]);
   const [selectedCoursIds, setSelectedCoursIds] = useState(() => route?.params?.filteredCoursIds ?? []);
+  const [selectedAnnonce, setSelectedAnnonce] = useState(null);
+  const [offerPrice, setOfferPrice] = useState('');
+  const [offerDate, setOfferDate] = useState('');
+  const [offerPlace, setOfferPlace] = useState('');
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -79,9 +83,38 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     setSelectedCoursIds([]);
   };
 
+  const openAnnonceDialog = (annonce) => {
+    setSelectedAnnonce(annonce);
+    setOfferPrice(String(annonce.prix_demande ?? ''));
+    setOfferDate('');
+    setOfferPlace(annonce.lieu ?? '');
+  };
+
+  const closeAnnonceDialog = () => {
+    setSelectedAnnonce(null);
+    setOfferPrice('');
+    setOfferDate('');
+    setOfferPlace('');
+  };
+
+  const handleSubmitOffer = () => {
+    if (!selectedAnnonce) return;
+    console.log('Nouvelle offre', {
+      annonceId: selectedAnnonce.id_annonce,
+      prix: offerPrice,
+      dateVente: offerDate,
+      lieu: offerPlace,
+    });
+    closeAnnonceDialog();
+  };
+
   function renderCard({ item }) {
     return (
-      <TouchableOpacity style={[styles.card, { backgroundColor: theme.background }]} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={[styles.card, { backgroundColor: theme.background }]}
+        activeOpacity={0.7}
+        onPress={() => openAnnonceDialog(item)}
+      >
         <Image source={item.image} style={styles.image} resizeMode="cover" />
         <View style={styles.meta}>
           <Text style={styles.price}>{formatPrice(item.prix_demande)} $</Text>
@@ -126,6 +159,62 @@ export default function ListAnnoncesScreen({ navigation, route }) {
           <Text style={styles.empty}>Aucune annonce ne correspond à ces filtres.</Text>
         }
       />
+
+      <Modal
+        visible={!!selectedAnnonce}
+        transparent
+        animationType="slide"
+        onRequestClose={closeAnnonceDialog}
+      >
+        <View style={styles.dialogOverlay}>
+          <View style={styles.dialogCard}>
+            {selectedAnnonce && (
+              <>
+                <Image source={selectedAnnonce.image} style={styles.dialogImage} resizeMode="cover" />
+                <Text style={styles.dialogTitle}>{selectedAnnonce.titre}</Text>
+                <Text style={styles.dialogDescription}>{selectedAnnonce.description}</Text>
+
+                <View style={styles.dialogRow}>
+                  <Text style={styles.dialogLabel}>Prix demandé</Text>
+                  <Text style={styles.dialogValue}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
+                </View>
+                <View style={styles.dialogRow}>
+                  <Text style={styles.dialogLabel}>Lieu</Text>
+                  <Text style={styles.dialogValue}>{selectedAnnonce.lieu}</Text>
+                </View>
+
+                <View style={styles.dialogForm}>
+                  <Text style={styles.dialogFormTitle}>Faire une offre</Text>
+                  <TextInput
+                    style={styles.dialogInput}
+                    placeholder="Montant de l'offre"
+                    keyboardType="numeric"
+                    value={offerPrice}
+                    onChangeText={setOfferPrice}
+                  />
+                  <TextInput
+                    style={styles.dialogInput}
+                    placeholder="Date de la vente (AAAA-MM-JJ)"
+                    value={offerDate}
+                    onChangeText={setOfferDate}
+                  />
+                  <TextInput
+                    style={styles.dialogInput}
+                    placeholder="Lieu de la vente"
+                    value={offerPlace}
+                    onChangeText={setOfferPlace}
+                  />
+
+                  <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
+                    <Text style={styles.offerButtonLabel}>Faire une offre</Text>
+                  </TouchableOpacity>
+                  <Button title="Fermer" onPress={closeAnnonceDialog} />
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -198,5 +287,72 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#6b7280',
     paddingVertical: 40,
+  },
+  dialogOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  dialogCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    maxHeight: '90%',
+  },
+  dialogImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  dialogTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  dialogDescription: {
+    marginTop: 6,
+    color: '#4b5563',
+    lineHeight: 20,
+  },
+  dialogRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  dialogLabel: {
+    color: '#6b7280',
+    fontWeight: '600',
+  },
+  dialogValue: {
+    color: '#111827',
+    fontWeight: '700',
+  },
+  dialogForm: {
+    marginTop: 16,
+    gap: 12,
+  },
+  dialogFormTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  dialogInput: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  offerButton: {
+    backgroundColor: '#1877f2',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  offerButtonLabel: {
+    color: '#fff',
+    fontWeight: '700',
   },
 });

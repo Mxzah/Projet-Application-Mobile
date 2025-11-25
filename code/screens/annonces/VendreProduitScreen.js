@@ -6,16 +6,20 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  Picker,
+  Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
+import { Picker } from '@react-native-picker/picker';
 import authService from '../../services/Auth';
 import MarthaService from '../../services/Martha';
+import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
 
 const marthaService = new MarthaService();
 
-export default function PlaceholderVendre({ navigation }) {
+export default function VendreProduitScreen({ navigation }) {
 
 
   function handleMettreEnVente() {
@@ -66,6 +70,27 @@ export default function PlaceholderVendre({ navigation }) {
     };
   }, []);
 
+  async function handleTakePhoto() {
+
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.1,
+      base64: true,
+      allowsEditing: false,
+    });
+
+    if (result.canceled) return;
+    const asset = result.assets?.[0];
+    if (!asset) return;
+
+    try {
+      await MediaLibrary.saveToLibraryAsync(asset.uri);
+    } catch (error) {
+      console.warn('Impossible d’enregistrer la photo', error);
+    }
+
+    setImage(asset.base64 ?? '');
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <MarketplaceHeader
@@ -85,12 +110,17 @@ export default function PlaceholderVendre({ navigation }) {
 
             <View style={styles.field}>
               <Text style={styles.label}>Image</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="URL ou nom du fichier"
-                value={image}
-                onChangeText={setImage}
-              />
+              {image ? (
+                <Image source={{ uri: `data:image/jpeg;base64,${image}` }} style={styles.preview} />
+              ) : (
+                <View style={[styles.preview, styles.previewPlaceholder]}>
+                  <Text style={styles.previewPlaceholderText}>Aucune photo</Text>
+                </View>
+              )}
+              <TouchableOpacity style={styles.cameraButton} onPress={handleTakePhoto}>
+                <Text style={styles.cameraButtonLabel}>Prendre une photo</Text>
+              </TouchableOpacity>
+              <Text style={styles.helperText}>L’image est compressée et stockée en base64 (qualité 0.1).</Text>
             </View>
 
             <View style={styles.field}>
@@ -248,5 +278,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 16,
     letterSpacing: 0.3,
+  },
+  preview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 12,
+    backgroundColor: '#e5e7eb',
+  },
+  previewPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewPlaceholderText: {
+    color: '#6b7280',
+    fontWeight: '600',
+  },
+  cameraButton: {
+    backgroundColor: '#111827',
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  cameraButtonLabel: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#6b7280',
   },
 });

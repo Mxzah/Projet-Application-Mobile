@@ -7,7 +7,7 @@ import MarthaService from '../../services/Martha';
 
 const marthaService = new MarthaService();
 
-export default function PlaceholderProgrammes({ navigation, route }) {
+export default function FilterByProgrammesScreen({ navigation, route }) {
   
   const [programmes, setProgrammes] = useState([]);
   const [cours, setCours] = useState([]);

@@ -4,9 +4,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import LoginScreen from './screens/auth/LoginScreen';
 import SignUpScreen from './screens/auth/SignUpScreen';
 import ListAnnoncesScreen from './screens/annonces/ListAnnoncesScreen';
-import PlaceholderVendre from './screens/annonces/PlaceholderVendre';
-import PlaceholderProgrammes from './screens/annonces/PlaceholderProgrammes';
-import ProgrammeCoursScreen from './screens/annonces/ProgrammeCoursScreen';
+import VendreProduitScreen from './screens/annonces/VendreProduitScreen';
+import FilterByProgrammesScreen from './screens/annonces/FilterByProgrammesScreen';
 import ProfilScreen from './screens/profil/ProfilScreen';
 import { ThemeProvider } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
 
@@ -32,15 +31,11 @@ export default function App() {
             />
             <Stack.Screen
               name="Vendre"
-              component={PlaceholderVendre}
+              component={VendreProduitScreen}
             />
             <Stack.Screen
               name="Programmes"
-              component={PlaceholderProgrammes}
-            />
-            <Stack.Screen
-              name="ProgrammeCours"
-              component={ProgrammeCoursScreen}
+              component={FilterByProgrammesScreen}
             />
             <Stack.Screen
               name="Profil"
