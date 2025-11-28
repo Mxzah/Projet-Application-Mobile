@@ -2,7 +2,7 @@ import User from "../screens/auth/User.model.js";
 
 
 class AuthService {
-    #currentUser = null // ATTENTION, à utiliser judicieusement
+    #currentUser = null
 
     get currentUser() {
         return this.#currentUser
@@ -65,10 +65,6 @@ class AuthService {
         this.#currentUser = null;
         return false;
     }
-
-
-
-    // ...
 }
 
 const service = new AuthService()

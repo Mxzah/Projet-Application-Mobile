@@ -9,9 +9,12 @@ export const geAnnoncestStyles = (theme) =>
         row: {
             gap: 8,
             paddingVertical: 6,
+            justifyContent: 'flex-start',
         },
         card: {
             flex: 1,
+            flexBasis: '48%',
+            maxWidth: '48%',
             backgroundColor: theme.card,
             borderRadius: 8,
             overflow: "hidden",
@@ -188,7 +191,7 @@ export const getHeaderStyles = (theme) =>
             color: theme.text,
         },
         activeTab: {
-            backgroundColor: theme.primaryLight, // ajoute cette couleur dans ton ThemeContext
+            backgroundColor: theme.primaryLight,
         },
         activeTabText: {
             color: theme.primary,
@@ -289,7 +292,7 @@ export const getCreateAnnonceStyles = (theme) =>
             fontWeight: '600',
         },
         cameraButton: {
-            backgroundColor: theme.text, // bouton foncé basé sur le thème
+            backgroundColor: theme.text,
             paddingVertical: 10,
             borderRadius: 10,
             alignItems: 'center',
@@ -362,7 +365,7 @@ export const getProgrammesStyles = (theme) =>
             fontSize: 12,
             fontWeight: "700",
             color: theme.primary,
-            backgroundColor: theme.primaryLight, // ajoute primaryLight dans ton ThemeContext
+            backgroundColor: theme.primaryLight,
             paddingHorizontal: 8,
             paddingVertical: 2,
             borderRadius: 999,
@@ -425,7 +428,6 @@ export const getProfileStyles = (theme) =>
             paddingBottom: 30,
         },
 
-        // Header
         header: {
             backgroundColor: theme.card,
             paddingVertical: 30,
@@ -487,7 +489,6 @@ export const getProfileStyles = (theme) =>
             fontSize: 14,
         },
 
-        // Infos
         infoSection: {
             backgroundColor: theme.card,
             padding: 16,
@@ -512,7 +513,6 @@ export const getProfileStyles = (theme) =>
             color: theme.text,
         },
 
-        // Sections titres
         sectionTitle: {
             fontSize: 18,
             fontWeight: "800",
@@ -522,7 +522,6 @@ export const getProfileStyles = (theme) =>
             color: theme.text,
         },
 
-        // Annonces
         annonceCard: {
             flexDirection: "row",
             backgroundColor: theme.card,
@@ -575,7 +574,6 @@ export const getProfileStyles = (theme) =>
             marginBottom: 8,
         },
 
-        // Empty states
         emptyBox: {
             backgroundColor: theme.card,
             marginHorizontal: 18,
@@ -587,7 +585,6 @@ export const getProfileStyles = (theme) =>
             color: theme.textLight,
         },
 
-        // Avis
         avisCard: {
             backgroundColor: theme.card,
             marginHorizontal: 18,

@@ -129,7 +129,7 @@ export default function FilterByProgrammesScreen({ navigation, route }) {
         active="Programmes"
         onPressVendre={() => navigation.navigate('Vendre')}
         onPressAcheter={() => navigation.navigate('ListAnnonces')}
-        onPressProgrammes={() => { /* already here */ }}
+        onPressProgrammes={() => {}}
       />
       <View style={styles.listHeader}>
         <Text style={styles.title}>Programmes</Text>

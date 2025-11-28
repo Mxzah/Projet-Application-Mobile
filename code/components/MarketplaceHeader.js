@@ -20,7 +20,6 @@ export default function MarketplaceHeader({
   const isActive = (tab) => active === tab;
   return (
     <View style={styles.container}>
-      {/* Top row: title + right icons */}
       <View style={styles.topRow}>
         <Text style={styles.title}>Marketplace</Text>
 
@@ -35,13 +34,11 @@ export default function MarketplaceHeader({
         </View>
       </View>
 
-      {/* Tabs row: Vendre / Acheter / Programmes */}
       <View style={styles.tabsRow}>
         <TouchableOpacity style={[styles.tab, isActive('Vendre') && styles.activeTab]} onPress={onPressVendre}>
           <Text style={[styles.tabText, isActive('Vendre') && styles.activeTabText]}>Vendre</Text>
         </TouchableOpacity>
 
-        {/* Acheter */}
         <TouchableOpacity style={[styles.tab, isActive('Acheter') && styles.activeTab]} onPress={onPressAcheter}>
           <Text style={[styles.tabText, isActive('Acheter') && styles.activeTabText]}>Acheter</Text>
         </TouchableOpacity>

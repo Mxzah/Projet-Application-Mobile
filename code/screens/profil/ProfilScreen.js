@@ -24,8 +24,6 @@ export default function ProfilScreen({ navigation, route }) {
     const [mesAnnonces, setMesAnnonces] = useState([]);
 
     const idProfil = route?.params?.id_utilisateur;
-    // si quelqu’un clique sur un avis → idProfil existe
-    // sinon → undefined
 
     useFocusEffect(
         useCallback(() => {
@@ -38,7 +36,6 @@ export default function ProfilScreen({ navigation, route }) {
                     return;
                 }
 
-                // 1) charger le bon user
                 if (idProfil) {
                     const autreUser = await marthaService.getUserById(idACharger);
                     setUser(autreUser);
@@ -46,7 +43,6 @@ export default function ProfilScreen({ navigation, route }) {
                     setUser(authService.currentUser);
                 }
 
-                // 2) charger SES avis (pas toujours ceux du connecté)
                 const avis = await marthaService.getAvisByUser(idACharger);
                 setMesAvis(avis);
 
@@ -102,7 +98,6 @@ export default function ProfilScreen({ navigation, route }) {
 
 
     const renderAnnonce = ({ item }) => {
-        // ✅ sécuriser les dates
         const debut = item.date_debut
             ? new Date(item.date_debut).toLocaleDateString()
             : "";
@@ -110,13 +105,11 @@ export default function ProfilScreen({ navigation, route }) {
             ? new Date(item.date_fin).toLocaleDateString()
             : "";
 
-        // ✅ convertir le prix en number proprement
         const prixNumber = Number(item.prix_demande);
         const prixTexte = Number.isFinite(prixNumber)
             ? `${prixNumber.toFixed(2)} $`
             : `${item.prix_demande ?? ""} $`;
 
-        // ✅ sécuriser l'image base64
         const resolveImage = (base64String) => {
             if (typeof base64String !== 'string' || base64String.length === 0) {
                 return "https://via.placeholder.com/200x200?text=Annonce";
@@ -165,7 +158,6 @@ export default function ProfilScreen({ navigation, route }) {
             style={styles.container}
             contentContainerStyle={styles.scrollContent}
         >
-            {/* Header profil */}
             <View style={styles.header}>
                 <TouchableOpacity
                     onPress={toggleTheme}
@@ -197,7 +189,6 @@ export default function ProfilScreen({ navigation, route }) {
                 </TouchableOpacity>
             </View>
 
-            {/* Infos de base */}
             <View style={styles.infoSection}>
                 <Text style={styles.infoLabel}>Nom complet</Text>
                 <Text style={styles.infoValue}>
@@ -219,7 +210,6 @@ export default function ProfilScreen({ navigation, route }) {
                 </Text>
             </View>
 
-            {/* Annonces */}
             <Text style={styles.sectionTitle}>Annonces</Text>
             {mesAnnonces.length === 0 ? (
                 <View style={styles.emptyBox}>
@@ -234,7 +224,6 @@ export default function ProfilScreen({ navigation, route }) {
                 />
             )}
 
-            {/* Avis */}
             <Text style={styles.sectionTitle}>Avis</Text>
             {mesAvis.length === 0 ? (
                 <View style={styles.emptyBox}>

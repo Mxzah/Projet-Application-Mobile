@@ -16,7 +16,6 @@ export const ThemeProvider = ({ children }) => {
         inputBackground: "#f9fafb",
         buttonText: "#ffffff",
         submitButtonText: "#ffffffff",
-        // ...
     };
 
     const darkTheme = {
@@ -30,7 +29,6 @@ export const ThemeProvider = ({ children }) => {
         inputBackground: "#1f2937",
         buttonText: "#000000ff",
         submitButtonText: "#ffffffff",
-        // ...
     };
 
 
@@ -45,5 +43,4 @@ export const ThemeProvider = ({ children }) => {
     );
 };
 
-// Hook pratique
 export const useTheme = () => useContext(ThemeContext);

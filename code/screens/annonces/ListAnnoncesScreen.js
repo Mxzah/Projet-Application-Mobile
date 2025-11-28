@@ -132,7 +132,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
       <MarketplaceHeader
         active="Acheter"
         onPressVendre={() => navigation.navigate('Vendre')}
-        onPressAcheter={() => { /* already here */ }}
+        onPressAcheter={() => {}}
         onPressProgrammes={handleOpenProgrammes}
       />
 

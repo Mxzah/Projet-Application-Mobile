@@ -98,7 +98,7 @@ export default function VendreProduitScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <MarketplaceHeader
         active="Vendre"
-        onPressVendre={() => { /* already here */ }}
+        onPressVendre={() => {}}
         onPressAcheter={() => navigation.navigate('ListAnnonces')}
         onPressProgrammes={() => navigation.navigate('Programmes')}
       />
