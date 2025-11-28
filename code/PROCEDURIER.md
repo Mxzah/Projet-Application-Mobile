@@ -50,7 +50,10 @@
 
 - Clic sur une carte d'annonce: Ouverture d'une modal avec les détails complets
 - Modal affiche: Image, titre, description, prix demandé, lieu
+- Lien vers le profil du vendeur: Affichage du lien "Voir le profil du vendeur" si l'annonce a un vendeur associé
+- Clic sur "Voir le profil du vendeur": Fermeture de la modal et navigation vers le profil du vendeur
 - Formulaire d'offre dans la modal: Champs pour montant de l'offre, date de la vente, lieu de la vente
+- Modal scrollable: Le contenu de la modal peut être défilé si nécessaire pour accéder à tous les éléments
 - Clic sur "FAIRE UNE OFFRE": Non implémenté
 - Clic sur "Fermer": Fermeture de la modal
 
@@ -126,11 +129,35 @@
 
 - Clic sur "Voir les annonces": Navigation vers l'écran Liste des annonces
 
+### Déconnexion
+
+- Affichage: Bouton "Se déconnecter" visible uniquement sur le profil personnel
+- Clic sur "Se déconnecter": Déconnexion de l'utilisateur et redirection vers l'écran Connexion
+
+### Propositions reçues
+
+- Affichage: Section visible uniquement sur le profil personnel (pas sur le profil d'un autre utilisateur)
+- Propositions disponibles: Affichage de la liste des propositions reçues sur les annonces de l'utilisateur
+- Informations affichées: Titre de l'annonce, nom de l'acheteur, prix proposé, lieu proposé, date de la proposition, statut
+- Aucune proposition: Affichage du message "Aucune proposition pour l'instant."
+- Statut des propositions: Affichage du statut (en attente, acceptée, refusée)
+- Proposition en attente: Affichage des boutons "Accepter" et "Refuser"
+- Clic sur "Accepter": Mise à jour du statut de la proposition à "acceptée"
+- Clic sur "Refuser": Mise à jour du statut de la proposition à "refusée"
+- Proposition acceptée ou refusée: Les boutons d'action ne sont plus affichés
+
 ### Annonces de l'utilisateur
 
 - Annonces disponibles: Affichage de la liste des annonces de l'utilisateur avec image, titre, lieu, prix et dates
 - Aucune annonce: Affichage du message "Aucune annonce pour l'instant."
-- Clic sur une annonce: Navigation vers l'écran Détails de l'annonce (non implémenté actuellement)
+- Consultation de son propre profil: Les annonces ne sont pas cliquables (pas d'interaction)
+- Consultation du profil d'un autre utilisateur: Les annonces sont cliquables
+- Clic sur une annonce (profil d'un autre utilisateur): Ouverture d'une modal avec les détails complets de l'annonce
+- Modal affiche: Image, titre, description, prix demandé, lieu
+- Formulaire d'offre dans la modal: Champs pour montant de l'offre, date de la vente, lieu de la vente
+- Modal scrollable: Le contenu de la modal peut être défilé si nécessaire pour accéder à tous les éléments
+- Clic sur "FAIRE UNE OFFRE": Non implémenté
+- Clic sur "Fermer": Fermeture de la modal
 
 ### Avis
 
@@ -142,6 +169,33 @@
 ### Consultation d'un autre profil
 
 - Navigation depuis un avis: Affichage du profil de l'utilisateur qui a laissé l'avis
-- Informations affichées: Même structure que le profil personnel
+- Navigation depuis le lien "Voir le profil du vendeur": Affichage du profil du vendeur depuis une annonce
+- Informations affichées: Même structure que le profil personnel (sans la section "Propositions reçues")
 - Annonces et avis: Affichage des annonces et avis de l'utilisateur consulté
+- Annonces cliquables: Possibilité de cliquer sur les annonces pour faire une offre
+
+## Standards de développement
+
+### Code
+
+- Noms de variables et fonctions en camelCase
+- Noms de classes en PascalCase
+- Organisation du code par fonctionnalité
+
+### Base de données (BD)
+
+- Noms de tables au pluriel et en majuscule
+- Noms de colonnes en snake_case
+- Clés primaires : toujours id_<table>
+
+### Interface utilisateur (UI)
+
+- Palette de couleurs principale (bleu pour les actions, rouge pour les erreurs)
+- Police utilisée (Sans Serif)
+- Boutons d'action principaux toujours centrés, en bas des formulaires
+- Même style pour tous les formulaires (labels au-dessus des champs et champs pleine largeur)
+
+### Expérience utilisateur (UX)
+
+- Navigation cohérente : l'entête de page constant sur toutes les pages
 

@@ -3,6 +3,7 @@ import { View, Text, Button, FlatList, Image, TouchableOpacity, Modal, TextInput
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
 import MarthaService from '../../services/Martha';
+import authService from '../../services/Auth';
 import { geAnnoncestStyles } from '../../styles';
 import { useTheme } from "../../context/ThemeContext";
 
@@ -71,8 +72,18 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   }, [route?.params?.filteredCoursIds]);
 
   const filteredAnnonces = useMemo(() => {
-    if (!selectedCoursIds?.length) return annonces;
-    return annonces.filter((annonce) => selectedCoursIds.includes(annonce.id_cours));
+    const currentUserId = authService.currentUser?.id;
+    let filtered = annonces;
+
+    if (currentUserId) {
+      filtered = filtered.filter((annonce) => annonce.id_utilisateur !== currentUserId);
+    }
+
+    if (selectedCoursIds?.length) {
+      filtered = filtered.filter((annonce) => selectedCoursIds.includes(annonce.id_cours));
+    }
+
+    return filtered;
   }, [annonces, selectedCoursIds]);
 
   const handleOpenProgrammes = () => {
