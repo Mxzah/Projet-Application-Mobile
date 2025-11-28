@@ -84,8 +84,10 @@ export const geAnnoncestStyles = (theme) =>
         dialogCard: {
             backgroundColor: theme.card,
             borderRadius: 16,
-            padding: 16,
             maxHeight: "90%",
+        },
+        dialogScrollContent: {
+            padding: 16,
         },
         dialogImage: {
             width: "100%",
@@ -149,8 +151,8 @@ export const geAnnoncestStyles = (theme) =>
             backgroundColor: theme.primary,
             paddingVertical: 12,
             alignItems: "center",
-            marginTop: 12,
-            marginBottom: 6,
+            marginTop: 6,
+            marginBottom: 2,
             borderRadius: 10,
         },
         offerButtonLabel: {
@@ -650,8 +652,10 @@ export const getProfileStyles = (theme) =>
         dialogCard: {
             backgroundColor: theme.card,
             borderRadius: 16,
-            padding: 16,
             maxHeight: "90%",
+        },
+        dialogScrollContent: {
+            padding: 16,
         },
         dialogImage: {
             width: "100%",
@@ -716,7 +720,7 @@ export const getProfileStyles = (theme) =>
             paddingVertical: 12,
             alignItems: "center",
             marginTop: 12,
-            marginBottom: 6,
+            marginBottom: 2,
             borderRadius: 10,
         },
         offerButtonLabel: {

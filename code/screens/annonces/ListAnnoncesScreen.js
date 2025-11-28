@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, Button, FlatList, Image, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, Button, FlatList, Image, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
 import MarthaService from '../../services/Martha';
@@ -171,63 +171,68 @@ export default function ListAnnoncesScreen({ navigation, route }) {
       >
         <View style={styles.dialogOverlay}>
           <View style={styles.dialogCard}>
-            {selectedAnnonce && (
-              <>
-                <Image source={selectedAnnonce.image} style={styles.dialogImage} resizeMode="cover" />
-                <Text style={styles.dialogTitle}>{selectedAnnonce.titre}</Text>
-                <Text style={styles.dialogDescription}>{selectedAnnonce.description}</Text>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.dialogScrollContent}
+            >
+              {selectedAnnonce && (
+                <>
+                  <Image source={selectedAnnonce.image} style={styles.dialogImage} resizeMode="cover" />
+                  <Text style={styles.dialogTitle}>{selectedAnnonce.titre}</Text>
+                  <Text style={styles.dialogDescription}>{selectedAnnonce.description}</Text>
 
-                <View style={styles.dialogRow}>
-                  <Text style={styles.dialogLabel}>Prix demandé</Text>
-                  <Text style={styles.dialogValue}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
-                </View>
-                <View style={styles.dialogRow}>
-                  <Text style={styles.dialogLabel}>Lieu</Text>
-                  <Text style={styles.dialogValue}>{selectedAnnonce.lieu}</Text>
-                </View>
+                  <View style={styles.dialogRow}>
+                    <Text style={styles.dialogLabel}>Prix demandé</Text>
+                    <Text style={styles.dialogValue}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
+                  </View>
+                  <View style={styles.dialogRow}>
+                    <Text style={styles.dialogLabel}>Lieu</Text>
+                    <Text style={styles.dialogValue}>{selectedAnnonce.lieu}</Text>
+                  </View>
 
-                {selectedAnnonce.id_utilisateur && (
-                  <TouchableOpacity
-                    style={styles.profileLink}
-                    onPress={() => {
-                      closeAnnonceDialog();
-                      navigation.navigate('Profil', { id_utilisateur: selectedAnnonce.id_utilisateur });
-                    }}
-                  >
-                    <Text style={styles.profileLinkText}>Voir le profil du vendeur</Text>
-                  </TouchableOpacity>
-                )}
+                  {selectedAnnonce.id_utilisateur && (
+                    <TouchableOpacity
+                      style={styles.profileLink}
+                      onPress={() => {
+                        closeAnnonceDialog();
+                        navigation.navigate('Profil', { id_utilisateur: selectedAnnonce.id_utilisateur });
+                      }}
+                    >
+                      <Text style={styles.profileLinkText}>Voir le profil du vendeur</Text>
+                    </TouchableOpacity>
+                  )}
 
-                <View style={styles.dialogForm}>
-                  <Text style={styles.dialogFormTitle}>Faire une offre</Text>
-                  <TextInput
-                    style={styles.dialogInput}
-                    placeholder="Montant de l'offre"
-                    keyboardType="numeric"
-                    value={offerPrice}
-                    onChangeText={setOfferPrice}
-                  />
-                  <TextInput
-                    style={styles.dialogInput}
-                    placeholder="Date de la vente (AAAA-MM-JJ)"
-                    placeholderTextColor="#888"
-                    value={offerDate}
-                    onChangeText={setOfferDate}
-                  />
-                  <TextInput
-                    style={styles.dialogInput}
-                    placeholder="Lieu de la vente"
-                    value={offerPlace}
-                    onChangeText={setOfferPlace}
-                  />
+                  <View style={styles.dialogForm}>
+                    <Text style={styles.dialogFormTitle}>Faire une offre</Text>
+                    <TextInput
+                      style={styles.dialogInput}
+                      placeholder="Montant de l'offre"
+                      keyboardType="numeric"
+                      value={offerPrice}
+                      onChangeText={setOfferPrice}
+                    />
+                    <TextInput
+                      style={styles.dialogInput}
+                      placeholder="Date de la vente (AAAA-MM-JJ)"
+                      placeholderTextColor="#888"
+                      value={offerDate}
+                      onChangeText={setOfferDate}
+                    />
+                    <TextInput
+                      style={styles.dialogInput}
+                      placeholder="Lieu de la vente"
+                      value={offerPlace}
+                      onChangeText={setOfferPlace}
+                    />
 
-                  <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
-                    <Text style={styles.offerButtonLabel}>FAIRE UNE OFFRE</Text>
-                  </TouchableOpacity>
-                  <Button title="Fermer" onPress={closeAnnonceDialog} />
-                </View>
-              </>
-            )}
+                    <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
+                      <Text style={styles.offerButtonLabel}>FAIRE UNE OFFRE</Text>
+                    </TouchableOpacity>
+                    <Button title="Fermer" onPress={closeAnnonceDialog} />
+                  </View>
+                </>
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
