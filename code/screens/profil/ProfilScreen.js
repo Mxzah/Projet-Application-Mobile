@@ -6,7 +6,10 @@ import {
     Image,
     FlatList,
     TouchableOpacity,
-    ScrollView
+    ScrollView,
+    Modal,
+    TextInput,
+    Button
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import authService from "../../services/Auth";
@@ -16,14 +19,37 @@ import { getProfileStyles } from "../../styles";
 
 const marthaService = new MarthaService();
 
+function formatPrice(n) {
+    try {
+        return new Intl.NumberFormat('fr-CA').format(n);
+    } catch {
+        return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+}
+
+function resolveAnnonceImage(base64String) {
+    if (typeof base64String !== 'string' || base64String.length === 0) {
+        return { uri: 'https://via.placeholder.com/300?text=Annonce' };
+    }
+    if (base64String.startsWith('data:image')) {
+        return { uri: base64String };
+    }
+    return { uri: `data:image/jpeg;base64,${base64String}` };
+}
+
 export default function ProfilScreen({ navigation, route }) {
 
     const [user, setUser] = useState(authService.currentUser);
 
     const [mesAvis, setMesAvis] = useState([]);
     const [mesAnnonces, setMesAnnonces] = useState([]);
+    const [selectedAnnonce, setSelectedAnnonce] = useState(null);
+    const [offerPrice, setOfferPrice] = useState('');
+    const [offerDate, setOfferDate] = useState('');
+    const [offerPlace, setOfferPlace] = useState('');
 
     const idProfil = route?.params?.id_utilisateur;
+    const isOwnProfile = !idProfil || idProfil === authService.currentUser?.id;
 
     useFocusEffect(
         useCallback(() => {
@@ -55,6 +81,31 @@ export default function ProfilScreen({ navigation, route }) {
     );
     const { theme, toggleTheme, isDark } = useTheme();
     const styles = getProfileStyles(theme);
+
+    const openAnnonceDialog = (annonce) => {
+        setSelectedAnnonce(annonce);
+        setOfferPrice(String(annonce.prix_demande ?? ''));
+        setOfferDate('');
+        setOfferPlace(annonce.lieu ?? '');
+    };
+
+    const closeAnnonceDialog = () => {
+        setSelectedAnnonce(null);
+        setOfferPrice('');
+        setOfferDate('');
+        setOfferPlace('');
+    };
+
+    const handleSubmitOffer = () => {
+        if (!selectedAnnonce) return;
+        console.log('Nouvelle offre', {
+            annonceId: selectedAnnonce.id_annonce,
+            prix: offerPrice,
+            dateVente: offerDate,
+            lieu: offerPlace,
+        });
+        closeAnnonceDialog();
+    };
 
 
 
@@ -124,8 +175,9 @@ export default function ProfilScreen({ navigation, route }) {
         return (
             <TouchableOpacity
                 style={styles.annonceCard}
-                activeOpacity={0.85}
-                onPress={() => navigation.navigate("DetailsAnnonce", { annonce: item })}
+                activeOpacity={isOwnProfile ? 1 : 0.85}
+                onPress={isOwnProfile ? undefined : () => openAnnonceDialog(item)}
+                disabled={isOwnProfile}
             >
                 <Image
                     source={{ uri: photoUri }}
@@ -237,6 +289,67 @@ export default function ProfilScreen({ navigation, route }) {
                     scrollEnabled={false}
                 />
             )}
+
+            <Modal
+                visible={!!selectedAnnonce}
+                transparent
+                animationType="slide"
+                onRequestClose={closeAnnonceDialog}
+            >
+                <View style={styles.dialogOverlay}>
+                    <View style={styles.dialogCard}>
+                        {selectedAnnonce && (
+                            <>
+                                <Image 
+                                    source={resolveAnnonceImage(selectedAnnonce.image_base64)} 
+                                    style={styles.dialogImage} 
+                                    resizeMode="cover" 
+                                />
+                                <Text style={styles.dialogTitle}>{selectedAnnonce.titre}</Text>
+                                <Text style={styles.dialogDescription}>{selectedAnnonce.description}</Text>
+
+                                <View style={styles.dialogRow}>
+                                    <Text style={styles.dialogLabel}>Prix demandé</Text>
+                                    <Text style={styles.dialogValue}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
+                                </View>
+                                <View style={styles.dialogRow}>
+                                    <Text style={styles.dialogLabel}>Lieu</Text>
+                                    <Text style={styles.dialogValue}>{selectedAnnonce.lieu}</Text>
+                                </View>
+
+                                <View style={styles.dialogForm}>
+                                    <Text style={styles.dialogFormTitle}>Faire une offre</Text>
+                                    <TextInput
+                                        style={styles.dialogInput}
+                                        placeholder="Montant de l'offre"
+                                        keyboardType="numeric"
+                                        value={offerPrice}
+                                        onChangeText={setOfferPrice}
+                                    />
+                                    <TextInput
+                                        style={styles.dialogInput}
+                                        placeholder="Date de la vente (AAAA-MM-JJ)"
+                                        placeholderTextColor="#888"
+                                        value={offerDate}
+                                        onChangeText={setOfferDate}
+                                    />
+                                    <TextInput
+                                        style={styles.dialogInput}
+                                        placeholder="Lieu de la vente"
+                                        value={offerPlace}
+                                        onChangeText={setOfferPlace}
+                                    />
+
+                                    <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
+                                        <Text style={styles.offerButtonLabel}>FAIRE UNE OFFRE</Text>
+                                    </TouchableOpacity>
+                                    <Button title="Fermer" onPress={closeAnnonceDialog} />
+                                </View>
+                            </>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }

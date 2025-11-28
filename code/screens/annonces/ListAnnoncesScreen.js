@@ -45,7 +45,6 @@ export default function ListAnnoncesScreen({ navigation, route }) {
       .getAnnonces()
       .then((data) => {
         if (!isMounted) return;
-        console.log('Annonces', data);
         const normalized = (data?.data ?? []).map((annonce) => ({
           ...annonce,
           image: resolveAnnonceImage(annonce.image_base64),
@@ -109,6 +108,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     });
     closeAnnonceDialog();
   };
+
 
   function renderCard({ item }) {
     return (

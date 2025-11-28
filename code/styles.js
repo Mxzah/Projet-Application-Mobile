@@ -87,6 +87,12 @@ export const geAnnoncestStyles = (theme) =>
             padding: 16,
             maxHeight: "90%",
         },
+        dialogImage: {
+            width: "100%",
+            height: 200,
+            borderRadius: 12,
+            marginBottom: 12,
+        },
         dialogTitle: {
             fontSize: 20,
             fontWeight: "700",
@@ -110,6 +116,16 @@ export const geAnnoncestStyles = (theme) =>
             color: theme.text,
             fontWeight: "700",
         },
+        dialogForm: {
+            marginTop: 16,
+            gap: 12,
+        },
+        dialogFormTitle: {
+            fontSize: 16,
+            fontWeight: "700",
+            color: theme.text,
+            marginBottom: 8,
+        },
         dialogInput: {
             borderWidth: 1,
             borderColor: theme.border,
@@ -117,6 +133,7 @@ export const geAnnoncestStyles = (theme) =>
             borderRadius: 10,
             paddingHorizontal: 12,
             paddingVertical: 10,
+            marginBottom: 12,
         },
         offerButton: {
             backgroundColor: theme.primary,
@@ -124,11 +141,11 @@ export const geAnnoncestStyles = (theme) =>
             alignItems: "center",
             marginTop: 12,
             marginBottom: 6,
+            borderRadius: 10,
         },
         offerButtonLabel: {
             color: theme.submitButtonText,
             fontWeight: "700",
-
         },
         sectionHeader: {
             paddingHorizontal: 12,
@@ -139,12 +156,6 @@ export const geAnnoncestStyles = (theme) =>
             fontWeight: "700",
             fontSize: 16,
             color: theme.text,
-        },
-        dialogFormTitle: {
-            fontSize: 16,
-            fontWeight: "700",
-            color: theme.text,
-            marginBottom: 8,
         },
     });
 
@@ -619,5 +630,77 @@ export const getProfileStyles = (theme) =>
             marginTop: 8,
             fontSize: 12,
             color: theme.primary,
+        },
+        dialogOverlay: {
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.35)",
+            justifyContent: "center",
+            padding: 16,
+        },
+        dialogCard: {
+            backgroundColor: theme.card,
+            borderRadius: 16,
+            padding: 16,
+            maxHeight: "90%",
+        },
+        dialogImage: {
+            width: "100%",
+            height: 200,
+            borderRadius: 12,
+            marginBottom: 12,
+        },
+        dialogTitle: {
+            fontSize: 20,
+            fontWeight: "700",
+            color: theme.text,
+        },
+        dialogDescription: {
+            marginTop: 6,
+            color: theme.textLight,
+            lineHeight: 20,
+        },
+        dialogRow: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 10,
+        },
+        dialogLabel: {
+            color: theme.textLight,
+            fontWeight: "600",
+        },
+        dialogValue: {
+            color: theme.text,
+            fontWeight: "700",
+        },
+        dialogForm: {
+            marginTop: 16,
+            gap: 12,
+        },
+        dialogFormTitle: {
+            fontSize: 16,
+            fontWeight: "700",
+            color: theme.text,
+            marginBottom: 8,
+        },
+        dialogInput: {
+            borderWidth: 1,
+            borderColor: theme.border,
+            color: theme.text,
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            marginBottom: 12,
+        },
+        offerButton: {
+            backgroundColor: theme.primary,
+            paddingVertical: 12,
+            alignItems: "center",
+            marginTop: 12,
+            marginBottom: 6,
+            borderRadius: 10,
+        },
+        offerButtonLabel: {
+            color: theme.submitButtonText,
+            fontWeight: "700",
         },
     });
