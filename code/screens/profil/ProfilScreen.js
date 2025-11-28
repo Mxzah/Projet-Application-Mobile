@@ -238,8 +238,6 @@ export default function ProfilScreen({ navigation, route }) {
         );
     };
 
-
-
     const renderAnnonce = ({ item }) => {
         const debut = item.date_debut
             ? new Date(item.date_debut).toLocaleDateString()
