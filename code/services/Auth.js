@@ -65,6 +65,11 @@ class AuthService {
         this.#currentUser = null;
         return false;
     }
+
+    logOut() {
+        this.#currentUser = null;
+    }
+
 }
 
 const service = new AuthService()

@@ -93,6 +93,39 @@ class MarthaService {
 
         return response.data; // tableau d'annonces
     }
+
+    async getPropositionsByUser(id_utilisateur) {
+        const response = await fetch(
+            "http://martha.jh.shawinigan.info/queries/select-propositions-by-user/execute",
+            {
+                method: "POST",
+                headers: {
+                    auth: "dGVhbTY6NzdDYzNjMzMwNDAyMzgxZSExNmFhOWE0OTUyOA==",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id_utilisateur }),
+            }
+        ).then(r => r.json());
+
+        return response.success ? response.data : [];
+    }
+
+    // 🔹 NOUVEAU : update statut (accepter / refuser)
+    async updatePropositionStatut(id_proposition, id_statut) {
+        const response = await fetch(
+            "http://martha.jh.shawinigan.info/queries/update-proposition-statut/execute",
+            {
+                method: "POST",
+                headers: {
+                    auth: "dGVhbTY6NzdDYzNjMzMwNDAyMzgxZSExNmFhOWE0OTUyOA==",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id_proposition, id_statut }),
+            }
+        ).then(r => r.json());
+
+        return response.success;
+    }
 }
 
 export default MarthaService;

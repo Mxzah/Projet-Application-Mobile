@@ -19,6 +19,8 @@ import { getProfileStyles } from "../../styles";
 
 const marthaService = new MarthaService();
 
+
+
 function formatPrice(n) {
     try {
         return new Intl.NumberFormat('fr-CA').format(n);
@@ -47,6 +49,8 @@ export default function ProfilScreen({ navigation, route }) {
     const [offerPrice, setOfferPrice] = useState('');
     const [offerDate, setOfferDate] = useState('');
     const [offerPlace, setOfferPlace] = useState('');
+    const [mesPropositions, setMesPropositions] = useState([]);  // 🔹 nouveau
+
 
     const idProfil = route?.params?.id_utilisateur;
     const isOwnProfile = !idProfil || idProfil === authService.currentUser?.id;
@@ -59,6 +63,8 @@ export default function ProfilScreen({ navigation, route }) {
                 if (!idACharger) {
                     setUser(null);
                     setMesAvis([]);
+                    setMesAnnonces([]);
+                    setMesPropositions([]);
                     return;
                 }
 
@@ -74,11 +80,41 @@ export default function ProfilScreen({ navigation, route }) {
 
                 const annonces = await marthaService.getAnnoncesByUser(idACharger);
                 setMesAnnonces(annonces);
+
+                // 🔹 NOUVEAU : propositions reçues sur mes annonces
+                const propositions = await marthaService.getPropositionsByUser(idACharger);
+                setMesPropositions(propositions);
             }
 
             loadProfilEtAvis();
         }, [idProfil])
     );
+
+    const handleUpdateProposition = async (id_proposition, nouveauStatut) => {
+        // nouveauStatut : 2 = acceptée, 3 = refusée (à adapter à ta lookup)
+        const ok = await marthaService.updatePropositionStatut(
+            id_proposition,
+            nouveauStatut
+        );
+
+        if (!ok) return;
+
+        // Mise à jour locale de la liste
+        setMesPropositions((prev) =>
+            prev.map((p) =>
+                p.id_proposition === id_proposition
+                    ? {
+                        ...p,
+                        id_statut: nouveauStatut,
+                        statut_description:
+                            nouveauStatut === 2 ? "acceptée" : "refusée",
+                    }
+                    : p
+            )
+        );
+    };
+
+
     const { theme, toggleTheme, isDark } = useTheme();
     const styles = getProfileStyles(theme);
 
@@ -119,6 +155,59 @@ export default function ProfilScreen({ navigation, route }) {
             </View>
         );
     }
+
+    const renderProposition = ({ item }) => {
+        const dateTexte = new Date(item.date_proposition).toLocaleDateString();
+        const prixNumber = Number(item.prix);
+        const prixTexte = Number.isFinite(prixNumber)
+            ? `${prixNumber.toFixed(2)} $`
+            : `${item.prix ?? ""} $`;
+
+        const enAttente =
+            item.id_statut === 1 || item.statut_description === "en attente";
+
+        return (
+            <View style={styles.propositionCard}>
+                <Text style={styles.propositionTitre}>
+                    Proposition sur : {item.titre_annonce}
+                </Text>
+
+                <Text style={styles.propositionLigne}>
+                    De : {item.acheteur_prenom} {item.acheteur_nom}
+                </Text>
+
+                <Text style={styles.propositionLigne}>
+                    Prix proposé : {prixTexte}
+                </Text>
+
+                <Text style={styles.propositionLigne}>
+                    Lieu proposé : {item.lieu || "Non précisé"}
+                </Text>
+
+                <Text style={styles.propositionMeta}>
+                    Le {dateTexte} • Statut : {item.statut_description}
+                </Text>
+
+                {enAttente && (
+                    <View style={styles.propositionActions}>
+                        <TouchableOpacity
+                            style={styles.btnAccept}
+                            onPress={() => handleUpdateProposition(item.id_proposition, 2)}
+                        >
+                            <Text style={styles.btnAcceptText}>Accepter</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.btnRefuse}
+                            onPress={() => handleUpdateProposition(item.id_proposition, 3)}
+                        >
+                            <Text style={styles.btnRefuseText}>Refuser</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
+        );
+    };
 
     const renderAvis = ({ item }) => {
         const stars = "★".repeat(item.note) + "☆".repeat(5 - item.note);
@@ -262,6 +351,21 @@ export default function ProfilScreen({ navigation, route }) {
                 </Text>
             </View>
 
+            <Text style={styles.sectionTitle}>Propositions reçues</Text>
+            {mesPropositions.length === 0 ? (
+                <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>Aucune proposition pour l’instant.</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={mesPropositions}
+                    keyExtractor={(item) => String(item.id_proposition)}
+                    renderItem={renderProposition}
+                    scrollEnabled={false}
+                />
+            )}
+
+
             <Text style={styles.sectionTitle}>Annonces</Text>
             {mesAnnonces.length === 0 ? (
                 <View style={styles.emptyBox}>
@@ -290,6 +394,8 @@ export default function ProfilScreen({ navigation, route }) {
                 />
             )}
 
+
+
             <Modal
                 visible={!!selectedAnnonce}
                 transparent
@@ -300,10 +406,10 @@ export default function ProfilScreen({ navigation, route }) {
                     <View style={styles.dialogCard}>
                         {selectedAnnonce && (
                             <>
-                                <Image 
-                                    source={resolveAnnonceImage(selectedAnnonce.image_base64)} 
-                                    style={styles.dialogImage} 
-                                    resizeMode="cover" 
+                                <Image
+                                    source={resolveAnnonceImage(selectedAnnonce.image_base64)}
+                                    style={styles.dialogImage}
+                                    resizeMode="cover"
                                 />
                                 <Text style={styles.dialogTitle}>{selectedAnnonce.titre}</Text>
                                 <Text style={styles.dialogDescription}>{selectedAnnonce.description}</Text>
@@ -350,6 +456,22 @@ export default function ProfilScreen({ navigation, route }) {
                     </View>
                 </View>
             </Modal>
+
+            {/* Bouton Déconnexion */}
+            <View style={styles.logoutWrapper}>
+                <TouchableOpacity
+                    style={styles.logoutButton}
+                    onPress={() => {
+                        authService.logOut();
+                        navigation.replace("Connexion");
+                    }}
+
+                >
+                    <Text style={styles.logoutText}>Se déconnecter</Text>
+                </TouchableOpacity>
+            </View>
+
+
         </ScrollView>
     );
 }
