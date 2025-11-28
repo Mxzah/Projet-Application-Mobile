@@ -414,55 +414,60 @@ export default function ProfilScreen({ navigation, route }) {
             >
                 <View style={styles.dialogOverlay}>
                     <View style={styles.dialogCard}>
-                        {selectedAnnonce && (
-                            <>
-                                <Image
-                                    source={resolveAnnonceImage(selectedAnnonce.image_base64)}
-                                    style={styles.dialogImage}
-                                    resizeMode="cover"
-                                />
-                                <Text style={styles.dialogTitle}>{selectedAnnonce.titre}</Text>
-                                <Text style={styles.dialogDescription}>{selectedAnnonce.description}</Text>
-
-                                <View style={styles.dialogRow}>
-                                    <Text style={styles.dialogLabel}>Prix demandé</Text>
-                                    <Text style={styles.dialogValue}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
-                                </View>
-                                <View style={styles.dialogRow}>
-                                    <Text style={styles.dialogLabel}>Lieu</Text>
-                                    <Text style={styles.dialogValue}>{selectedAnnonce.lieu}</Text>
-                                </View>
-
-                                <View style={styles.dialogForm}>
-                                    <Text style={styles.dialogFormTitle}>Faire une offre</Text>
-                                    <TextInput
-                                        style={styles.dialogInput}
-                                        placeholder="Montant de l'offre"
-                                        keyboardType="numeric"
-                                        value={offerPrice}
-                                        onChangeText={setOfferPrice}
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={styles.dialogScrollContent}
+                        >
+                            {selectedAnnonce && (
+                                <>
+                                    <Image
+                                        source={resolveAnnonceImage(selectedAnnonce.image_base64)}
+                                        style={styles.dialogImage}
+                                        resizeMode="cover"
                                     />
-                                    <TextInput
-                                        style={styles.dialogInput}
-                                        placeholder="Date de la vente (AAAA-MM-JJ)"
-                                        placeholderTextColor="#888"
-                                        value={offerDate}
-                                        onChangeText={setOfferDate}
-                                    />
-                                    <TextInput
-                                        style={styles.dialogInput}
-                                        placeholder="Lieu de la vente"
-                                        value={offerPlace}
-                                        onChangeText={setOfferPlace}
-                                    />
+                                    <Text style={styles.dialogTitle}>{selectedAnnonce.titre}</Text>
+                                    <Text style={styles.dialogDescription}>{selectedAnnonce.description}</Text>
 
-                                    <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
-                                        <Text style={styles.offerButtonLabel}>FAIRE UNE OFFRE</Text>
-                                    </TouchableOpacity>
-                                    <Button title="Fermer" onPress={closeAnnonceDialog} />
-                                </View>
-                            </>
-                        )}
+                                    <View style={styles.dialogRow}>
+                                        <Text style={styles.dialogLabel}>Prix demandé</Text>
+                                        <Text style={styles.dialogValue}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
+                                    </View>
+                                    <View style={styles.dialogRow}>
+                                        <Text style={styles.dialogLabel}>Lieu</Text>
+                                        <Text style={styles.dialogValue}>{selectedAnnonce.lieu}</Text>
+                                    </View>
+
+                                    <View style={styles.dialogForm}>
+                                        <Text style={styles.dialogFormTitle}>Faire une offre</Text>
+                                        <TextInput
+                                            style={styles.dialogInput}
+                                            placeholder="Montant de l'offre"
+                                            keyboardType="numeric"
+                                            value={offerPrice}
+                                            onChangeText={setOfferPrice}
+                                        />
+                                        <TextInput
+                                            style={styles.dialogInput}
+                                            placeholder="Date de la vente (AAAA-MM-JJ)"
+                                            placeholderTextColor="#888"
+                                            value={offerDate}
+                                            onChangeText={setOfferDate}
+                                        />
+                                        <TextInput
+                                            style={styles.dialogInput}
+                                            placeholder="Lieu de la vente"
+                                            value={offerPlace}
+                                            onChangeText={setOfferPlace}
+                                        />
+
+                                        <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
+                                            <Text style={styles.offerButtonLabel}>FAIRE UNE OFFRE</Text>
+                                        </TouchableOpacity>
+                                        <Button title="Fermer" onPress={closeAnnonceDialog} />
+                                    </View>
+                                </>
+                            )}
+                        </ScrollView>
                     </View>
                 </View>
             </Modal>
