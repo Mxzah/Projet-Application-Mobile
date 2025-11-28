@@ -121,6 +121,7 @@ export default function VendreProduitScreen({ navigation }) {
                 </View>
               )}
               <TouchableOpacity style={styles.cameraButton} onPress={handleTakePhoto}>
+
                 <Text style={styles.cameraButtonLabel}>Prendre une photo</Text>
               </TouchableOpacity>
               <Text style={styles.helperText}>L’image est compressée et stockée en base64 (qualité 0.1).</Text>

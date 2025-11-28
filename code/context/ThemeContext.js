@@ -14,6 +14,8 @@ export const ThemeProvider = ({ children }) => {
         primary: "#1877f2",
         primaryLight: "#e6f0ff",
         inputBackground: "#f9fafb",
+        buttonText: "#ffffff",
+        submitButtonText: "#ffffffff",
         // ...
     };
 
@@ -26,6 +28,8 @@ export const ThemeProvider = ({ children }) => {
         primary: "#60a5fa",
         primaryLight: "#1d3b66",
         inputBackground: "#1f2937",
+        buttonText: "#000000ff",
+        submitButtonText: "#ffffffff",
         // ...
     };
 
