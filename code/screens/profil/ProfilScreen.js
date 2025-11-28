@@ -186,7 +186,7 @@ export default function ProfilScreen({ navigation, route }) {
                     style={styles.btnAnnonces}
                     onPress={() => navigation.navigate("ListAnnonces")}
                 >
-                    <Text style={styles.btnAnnoncesText}>Page accueil</Text>
+                    <Text style={styles.btnAnnoncesText}>Voir les annonces</Text>
                 </TouchableOpacity>
             </View>
 

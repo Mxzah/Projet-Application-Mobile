@@ -123,7 +123,7 @@ export const geAnnoncestStyles = (theme) =>
             marginBottom: 6,
         },
         offerButtonLabel: {
-            color: theme.text,
+            color: theme.submitButtonText,
             fontWeight: "700",
 
         },
@@ -268,7 +268,7 @@ export const getCreateAnnonceStyles = (theme) =>
             alignItems: 'center',
         },
         submitLabel: {
-            color: theme.buttonText,
+            color: theme.submitButtonText,
             fontWeight: '700',
             fontSize: 16,
             letterSpacing: 0.3,
@@ -482,7 +482,7 @@ export const getProfileStyles = (theme) =>
         },
 
         btnAnnoncesText: {
-            color: theme.buttonText,
+            color: theme.submitButtonText,
             fontWeight: "700",
             fontSize: 14,
         },
