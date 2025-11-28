@@ -81,9 +81,12 @@ export default function ProfilScreen({ navigation, route }) {
                 const annonces = await marthaService.getAnnoncesByUser(idACharger);
                 setMesAnnonces(annonces);
 
-                // 🔹 NOUVEAU : propositions reçues sur mes annonces
-                const propositions = await marthaService.getPropositionsByUser(idACharger);
-                setMesPropositions(propositions);
+                if (!idProfil || idProfil === authService.currentUser?.id) {
+                    const propositions = await marthaService.getPropositionsByUser(idACharger);
+                    setMesPropositions(propositions);
+                } else {
+                    setMesPropositions([]); // on vide au cas où
+                }
             }
 
             loadProfilEtAvis();
@@ -351,19 +354,26 @@ export default function ProfilScreen({ navigation, route }) {
                 </Text>
             </View>
 
-            <Text style={styles.sectionTitle}>Propositions reçues</Text>
-            {mesPropositions.length === 0 ? (
-                <View style={styles.emptyBox}>
-                    <Text style={styles.emptyText}>Aucune proposition pour l’instant.</Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={mesPropositions}
-                    keyExtractor={(item) => String(item.id_proposition)}
-                    renderItem={renderProposition}
-                    scrollEnabled={false}
-                />
+            {isOwnProfile && (
+                <>
+                    <Text style={styles.sectionTitle}>Propositions reçues</Text>
+                    {mesPropositions.length === 0 ? (
+                        <View style={styles.emptyBox}>
+                            <Text style={styles.emptyText}>
+                                Aucune proposition pour l’instant.
+                            </Text>
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={mesPropositions}
+                            keyExtractor={(item) => String(item.id_proposition)}
+                            renderItem={renderProposition}
+                            scrollEnabled={false}
+                        />
+                    )}
+                </>
             )}
+
 
 
             <Text style={styles.sectionTitle}>Annonces</Text>
@@ -458,18 +468,21 @@ export default function ProfilScreen({ navigation, route }) {
             </Modal>
 
             {/* Bouton Déconnexion */}
-            <View style={styles.logoutWrapper}>
-                <TouchableOpacity
-                    style={styles.logoutButton}
-                    onPress={() => {
-                        authService.logOut();
-                        navigation.replace("Connexion");
-                    }}
 
-                >
-                    <Text style={styles.logoutText}>Se déconnecter</Text>
-                </TouchableOpacity>
-            </View>
+            {isOwnProfile && (
+                <View style={styles.logoutWrapper}>
+                    <TouchableOpacity
+                        style={styles.logoutButton}
+                        onPress={() => {
+                            authService.logOut();
+                            navigation.replace("Connexion");
+                        }}
+
+                    >
+                        <Text style={styles.btnAnnoncesText}>Se déconnecter</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
 
 
         </ScrollView>
