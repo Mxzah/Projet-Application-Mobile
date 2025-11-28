@@ -6,7 +6,7 @@ class Annonce {
             titre,
             lieu = null,
             description = null,
-            url_photo = null,
+            image_base64 = null,
             date_debut = null,
             date_fin = null,
             prix_demande = null,
@@ -17,7 +17,7 @@ class Annonce {
             this.titre = titre;
             this.lieu = lieu;
             this.description = description;
-            this.url_photo = url_photo;
+            this.image_base64 = image_base64;
             this.date_debut = date_debut;
             this.date_fin = date_fin;
             this.prix_demande = prix_demande;
@@ -35,7 +35,7 @@ class Annonce {
                     titre: this.titre,
                     lieu: this.lieu,
                     description: this.description,
-                    url_photo: this.url_photo,
+                    image_base64: this.image_base64,
                     date_debut: this.date_debut,
                     date_fin: this.date_fin,
                     prix_demande: this.prix_demande,

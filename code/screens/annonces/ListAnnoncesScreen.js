@@ -18,17 +18,15 @@ function formatPrice(n) {
   }
 }
 
-function resolveAnnonceImage(url) {
-  if (typeof url !== 'string' || url.length === 0) {
+function resolveAnnonceImage(base64String) {
+  if (typeof base64String !== 'string' || base64String.length === 0) {
     return { uri: 'https://via.placeholder.com/300?text=Annonce' };
   }
 
-  if (url.startsWith('http')) {
-    return { uri: url };
+  if (base64String.startsWith('data:image')) {
+    return { uri: base64String };
   }
-
-  const cleaned = url.replace(/^\.\//, '');
-  return { uri: `http://martha.jh.shawinigan.info/${cleaned}` };
+  return { uri: `data:image/jpeg;base64,${base64String}` };
 }
 
 export default function ListAnnoncesScreen({ navigation, route }) {
@@ -50,7 +48,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
         console.log('Annonces', data);
         const normalized = (data?.data ?? []).map((annonce) => ({
           ...annonce,
-          image: resolveAnnonceImage(annonce.url_photo),
+          image: resolveAnnonceImage(annonce.image_base64),
         }));
         setAnnonces(normalized);
       })

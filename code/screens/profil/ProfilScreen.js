@@ -116,10 +116,17 @@ export default function ProfilScreen({ navigation, route }) {
             ? `${prixNumber.toFixed(2)} $`
             : `${item.prix_demande ?? ""} $`;
 
-        // ✅ sécuriser l'URL de l'image
-        const photoUri = item.url_photo
-            ? `http://martha.jh.shawinigan.info/${item.url_photo.replace(/^\.\//, "")}`
-            : "https://via.placeholder.com/200x200?text=Annonce";
+        // ✅ sécuriser l'image base64
+        const resolveImage = (base64String) => {
+            if (typeof base64String !== 'string' || base64String.length === 0) {
+                return "https://via.placeholder.com/200x200?text=Annonce";
+            }
+            if (base64String.startsWith('data:image')) {
+                return base64String;
+            }
+            return `data:image/jpeg;base64,${base64String}`;
+        };
+        const photoUri = resolveImage(item.image_base64);
 
         return (
             <TouchableOpacity
