@@ -116,6 +116,16 @@ export const geAnnoncestStyles = (theme) =>
             color: theme.text,
             fontWeight: "700",
         },
+        profileLink: {
+            marginTop: 12,
+            paddingVertical: 8,
+            alignItems: "center",
+        },
+        profileLinkText: {
+            color: theme.primary,
+            fontWeight: "600",
+            fontSize: 14,
+        },
         dialogForm: {
             marginTop: 16,
             gap: 12,
@@ -671,6 +681,16 @@ export const getProfileStyles = (theme) =>
         dialogValue: {
             color: theme.text,
             fontWeight: "700",
+        },
+        profileLink: {
+            marginTop: 12,
+            paddingVertical: 8,
+            alignItems: "center",
+        },
+        profileLinkText: {
+            color: theme.primary,
+            fontWeight: "600",
+            fontSize: 14,
         },
         dialogForm: {
             marginTop: 16,

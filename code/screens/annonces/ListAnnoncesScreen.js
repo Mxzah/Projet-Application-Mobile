@@ -186,6 +186,18 @@ export default function ListAnnoncesScreen({ navigation, route }) {
                   <Text style={styles.dialogValue}>{selectedAnnonce.lieu}</Text>
                 </View>
 
+                {selectedAnnonce.id_utilisateur && (
+                  <TouchableOpacity
+                    style={styles.profileLink}
+                    onPress={() => {
+                      closeAnnonceDialog();
+                      navigation.navigate('Profil', { id_utilisateur: selectedAnnonce.id_utilisateur });
+                    }}
+                  >
+                    <Text style={styles.profileLinkText}>Voir le profil du vendeur</Text>
+                  </TouchableOpacity>
+                )}
+
                 <View style={styles.dialogForm}>
                   <Text style={styles.dialogFormTitle}>Faire une offre</Text>
                   <TextInput
