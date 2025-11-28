@@ -703,4 +703,80 @@ export const getProfileStyles = (theme) =>
             color: theme.submitButtonText,
             fontWeight: "700",
         },
+        propositionCard: {
+            backgroundColor: theme.card,
+            marginHorizontal: 18,
+            marginVertical: 6,
+            padding: 14,
+            borderRadius: 12,
+            shadowColor: "#000",
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+        },
+        propositionTitre: {
+            fontSize: 15,
+            fontWeight: "700",
+            color: theme.text,
+            marginBottom: 4,
+        },
+        propositionLigne: {
+            fontSize: 14,
+            color: theme.text,
+        },
+        propositionMeta: {
+            marginTop: 6,
+            fontSize: 12,
+            color: theme.textLight,
+        },
+        propositionActions: {
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            marginTop: 10,
+            gap: 8,
+        },
+        btnAccept: {
+            backgroundColor: "#16a34a",
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            borderRadius: 8,
+        },
+        btnAcceptText: {
+            color: "#fff",
+            fontWeight: "700",
+        },
+        btnRefuse: {
+            backgroundColor: "#dc2626",
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            borderRadius: 8,
+        },
+        btnRefuseText: {
+            color: "#fff",
+            fontWeight: "700",
+        },
+        logoutWrapper: {
+            marginTop: 30,
+            marginBottom: 40,
+            alignItems: "center",
+        },
+
+        logoutButton: {
+            backgroundColor: theme.primary,
+            paddingVertical: 14,
+            paddingHorizontal: 26,
+            borderRadius: 12,
+            shadowColor: "#000",
+            shadowOpacity: 0.15,
+            shadowRadius: 6,
+            elevation: 3,
+        },
+
+        logoutText: {
+            color: theme.buttonText,
+            fontWeight: "700",
+            fontSize: 16,
+            letterSpacing: 0.3,
+        },
+
     });
