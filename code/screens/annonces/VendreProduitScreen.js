@@ -22,9 +22,12 @@ import { useTheme } from "../../context/ThemeContext";
 
 const marthaService = new MarthaService();
 
-export default function VendreProduitScreen({ navigation }) {
+export default function VendreProduitScreen({ navigation, route }) {
   const { theme } = useTheme();
   const styles = getCreateAnnonceStyles(theme);
+
+  const annonceToEdit = route?.params?.annonceToEdit;
+  const isEditMode = !!annonceToEdit;
 
   const [titre, setTitre] = useState("");
   const [lieu, setLieu] = useState("");
@@ -62,9 +65,9 @@ export default function VendreProduitScreen({ navigation }) {
       return;
     }
 
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const dateRegex = /^\d{4}-\d{2}-\d{2}(\s+\d{2}:\d{2}:\d{2})?$/;
     if (!dateRegex.test(dateFin)) {
-      setErrorMessage('Le format de la date doit être AAAA-MM-JJ (ex: 2024-12-31).');
+      setErrorMessage('Le format de la date doit être AAAA-MM-JJ ou AAAA-MM-JJ HH:MM:SS (ex: 2024-12-31 ou 2024-12-31 23:59:59).');
       return;
     }
 
@@ -87,24 +90,92 @@ export default function VendreProduitScreen({ navigation }) {
     }
 
     try {
-      const ok = await marthaService.insertAnnonce(
-        dateFin, 
-        prix, 
-        lieu, 
-        userId, 
-        coursSelection, 
-        1,
-        titre,
-        description || null,
-        image || null
-      );
+      let ok;
+      if (isEditMode && annonceToEdit) {
+        let dateDebut = annonceToEdit.date_debut || new Date().toISOString().split('T')[0];
+        if (dateDebut && typeof dateDebut === 'string') {
+          if (dateDebut.includes(' ')) {
+            dateDebut = dateDebut.split(' ')[0];
+          }
+          if (dateDebut.includes('T')) {
+            dateDebut = dateDebut.split('T')[0];
+          }
+        }
+        if (!dateDebut || dateDebut === '') {
+          dateDebut = new Date().toISOString().split('T')[0];
+        }
+        
+        if (!dateDebut.includes(' ')) {
+          dateDebut = dateDebut + ' 00:00:00';
+        }
+        
+        let dateFinFormatted = dateFin.trim();
+        if (dateFinFormatted.includes(' ')) {
+          const parts = dateFinFormatted.split(' ');
+          if (parts.length === 2) {
+            const datePart = parts[0];
+            const timePart = parts[1];
+            if (timePart.match(/^\d{2}:\d{2}:\d{2}$/)) {
+              dateFinFormatted = `${datePart} ${timePart}`;
+            } else {
+              dateFinFormatted = datePart + ' 23:59:59';
+            }
+          } else {
+            dateFinFormatted = parts[0] + ' 23:59:59';
+          }
+        } else {
+          dateFinFormatted = dateFinFormatted + ' 23:59:59';
+        }
+        
+        const idCoursNum = coursSelection ? Number(coursSelection) : null;
+        
+        console.log('Données envoyées pour updateAnnonce:', {
+          id_annonce: annonceToEdit.id_annonce,
+          date_debut: dateDebut,
+          date_fin: dateFinFormatted,
+          prix_demande: parseFloat(prix),
+          lieu,
+          id_cours: idCoursNum,
+          titre,
+          description: description || null,
+          image_base64: image ? `${image.substring(0, 50)}...` : null
+        });
+        
+        ok = await marthaService.updateAnnonce(
+          annonceToEdit.id_annonce,
+          dateDebut,
+          dateFinFormatted,
+          parseFloat(prix),
+          lieu,
+          idCoursNum,
+          titre,
+          description || null,
+          image || null,
+          annonceToEdit.id_utilisateur || userId
+        );
+      } else {
+        ok = await marthaService.insertAnnonce(
+          dateFin, 
+          prix, 
+          lieu, 
+          userId, 
+          coursSelection, 
+          titre,
+          description || null,
+          image || null
+        );
+      }
       
       if (!ok) {
-        setErrorMessage('Une erreur est survenue lors de la mise en vente de votre produit. Veuillez réessayer.');
+        setErrorMessage(isEditMode 
+          ? 'Une erreur est survenue lors de la modification de votre annonce. Veuillez réessayer.'
+          : 'Une erreur est survenue lors de la mise en vente de votre produit. Veuillez réessayer.');
         return;
       }
       
-      setSuccessMessage('Votre produit a été mis en vente avec succès!');
+      setSuccessMessage(isEditMode 
+        ? 'Votre annonce a été modifiée avec succès!'
+        : 'Votre produit a été mis en vente avec succès!');
       setTimeout(() => {
         navigation.navigate('ListAnnonces');
         setTitre('');
@@ -131,6 +202,11 @@ export default function VendreProduitScreen({ navigation }) {
       .then((data) => {
         if (!isMounted) return;
         setCoursOptions(data.data ?? []);
+        
+        if (annonceToEdit && annonceToEdit.id_cours) {
+          const coursId = annonceToEdit.id_cours;
+          setCoursSelection(String(coursId));
+        }
       })
       .catch((error) => {
         console.warn('Impossible de charger les cours', error);
@@ -143,6 +219,21 @@ export default function VendreProduitScreen({ navigation }) {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (annonceToEdit) {
+      setTitre(annonceToEdit.titre || "");
+      setLieu(annonceToEdit.lieu || "");
+      setDescription(annonceToEdit.description || "");
+      setImage(annonceToEdit.image_base64 || "");
+      setDateFin(annonceToEdit.date_fin || "");
+      setPrix(String(annonceToEdit.prix_demande || ""));
+      if (annonceToEdit.id_cours) {
+        setCoursSelection(String(annonceToEdit.id_cours));
+      }
+      setIdUtilisateur(String(annonceToEdit.id_utilisateur || ""));
+    }
+  }, [annonceToEdit]);
 
   async function handleTakePhoto() {
     const result = await ImagePicker.launchCameraAsync({
@@ -205,8 +296,8 @@ export default function VendreProduitScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.formCard}>
-            <Text style={styles.title}>Votre annonce</Text>
-            <Text style={styles.subtitle}>Complétez ces informations pour publier</Text>
+            <Text style={styles.title}>{isEditMode ? 'Modifier votre annonce' : 'Votre annonce'}</Text>
+            <Text style={styles.subtitle}>{isEditMode ? 'Modifiez les informations de votre annonce' : 'Complétez ces informations pour publier'}</Text>
 
             <View style={styles.field}>
               <Text style={styles.label}>Image</Text>
@@ -301,7 +392,7 @@ export default function VendreProduitScreen({ navigation }) {
             </View>
 
             <TouchableOpacity style={styles.submitButton} onPress={handleMettreEnVente}>
-              <Text style={styles.submitLabel}>Mettre en vente</Text>
+              <Text style={styles.submitLabel}>{isEditMode ? 'Modifier l\'annonce' : 'Mettre en vente'}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

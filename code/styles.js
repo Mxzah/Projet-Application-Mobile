@@ -604,7 +604,7 @@ export const getProfileStyles = (theme) =>
         },
 
         annonceCard: {
-            flexDirection: "row",
+            flexDirection: "column",
             backgroundColor: theme.card,
             marginHorizontal: 18,
             marginVertical: 8,
@@ -859,6 +859,40 @@ export const getProfileStyles = (theme) =>
             fontWeight: "700",
             fontSize: 16,
             letterSpacing: 0.3,
+        },
+        annonceActions: {
+            flexDirection: "row",
+            justifyContent: "space-around",
+            marginTop: 8,
+            gap: 8,
+            paddingHorizontal: 12,
+            paddingBottom: 8,
+        },
+        btnEdit: {
+            backgroundColor: "#3b82f6",
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            borderRadius: 6,
+            flex: 1,
+            alignItems: "center",
+        },
+        btnEditText: {
+            color: "#fff",
+            fontWeight: "600",
+            fontSize: 12,
+        },
+        btnDelete: {
+            backgroundColor: "#dc2626",
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            borderRadius: 6,
+            flex: 1,
+            alignItems: "center",
+        },
+        btnDeleteText: {
+            color: "#fff",
+            fontWeight: "600",
+            fontSize: 12,
         },
 
     });

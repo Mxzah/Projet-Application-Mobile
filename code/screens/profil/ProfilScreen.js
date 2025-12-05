@@ -9,7 +9,8 @@ import {
     ScrollView,
     Modal,
     TextInput,
-    Button
+    Button,
+    Alert
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import authService from "../../services/Auth";
@@ -113,6 +114,37 @@ export default function ProfilScreen({ navigation, route }) {
                     : p
             )
         );
+    };
+
+    const handleDeleteAnnonce = async (id_annonce) => {
+        Alert.alert(
+            "Supprimer l'annonce",
+            "Êtes-vous sûr de vouloir supprimer cette annonce ?",
+            [
+                {
+                    text: "Annuler",
+                    style: "cancel"
+                },
+                {
+                    text: "Supprimer",
+                    style: "destructive",
+                    onPress: async () => {
+                        const ok = await marthaService.deleteAnnonce(id_annonce);
+                        if (ok) {
+                            setMesAnnonces((prev) =>
+                                prev.filter((a) => a.id_annonce !== id_annonce)
+                            );
+                        } else {
+                            Alert.alert("Erreur", "Impossible de supprimer l'annonce.");
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleEditAnnonce = (annonce) => {
+        navigation.navigate("Vendre", { annonceToEdit: annonce });
     };
 
 
@@ -261,35 +293,55 @@ export default function ProfilScreen({ navigation, route }) {
         const photoUri = resolveImage(item.image_base64);
 
         return (
-            <TouchableOpacity
-                style={styles.annonceCard}
-                activeOpacity={isOwnProfile ? 1 : 0.85}
-                onPress={isOwnProfile ? undefined : () => openAnnonceDialog(item)}
-                disabled={isOwnProfile}
-            >
-                <Image
-                    source={{ uri: photoUri }}
-                    style={styles.annonceImage}
-                />
+            <View style={styles.annonceCard}>
+                <TouchableOpacity
+                    style={{ flexDirection: "row" }}
+                    activeOpacity={isOwnProfile ? 1 : 0.85}
+                    onPress={isOwnProfile ? undefined : () => openAnnonceDialog(item)}
+                    disabled={isOwnProfile}
+                >
+                    <Image
+                        source={{ uri: photoUri }}
+                        style={styles.annonceImage}
+                    />
 
-                <View style={styles.annonceContent}>
-                    <Text style={styles.annonceTitre} numberOfLines={1}>
-                        {item.titre}
-                    </Text>
+                    <View style={styles.annonceContent}>
+                        <Text style={styles.annonceTitre} numberOfLines={1}>
+                            {item.titre}
+                        </Text>
 
-                    <Text style={styles.annonceLieu}>
-                        {item.lieu}
-                    </Text>
+                        <Text style={styles.annonceLieu}>
+                            {item.lieu}
+                        </Text>
 
-                    <Text style={styles.annoncePrix}>
-                        {prixTexte}
-                    </Text>
+                        <Text style={styles.annoncePrix}>
+                            {prixTexte}
+                        </Text>
 
-                    <Text style={styles.annonceDates}>
-                        {debut && fin ? `${debut} → ${fin}` : ""}
-                    </Text>
-                </View>
-            </TouchableOpacity>
+                        <Text style={styles.annonceDates}>
+                            {debut && fin ? `${debut} → ${fin}` : ""}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+
+                {isOwnProfile && (
+                    <View style={styles.annonceActions}>
+                        <TouchableOpacity
+                            style={styles.btnEdit}
+                            onPress={() => handleEditAnnonce(item)}
+                        >
+                            <Text style={styles.btnEditText}>Modifier</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.btnDelete}
+                            onPress={() => handleDeleteAnnonce(item.id_annonce)}
+                        >
+                            <Text style={styles.btnDeleteText}>Supprimer</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
         );
     };
 

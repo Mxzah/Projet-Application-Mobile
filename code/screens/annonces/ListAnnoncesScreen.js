@@ -129,9 +129,9 @@ export default function ListAnnoncesScreen({ navigation, route }) {
       return;
     }
 
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const dateRegex = /^\d{4}-\d{2}-\d{2}(\s+\d{2}:\d{2}:\d{2})?$/;
     if (!dateRegex.test(offerDate)) {
-      setErrorMessage('Le format de la date doit être AAAA-MM-JJ (ex: 2024-12-31).');
+      setErrorMessage('Le format de la date doit être AAAA-MM-JJ ou AAAA-MM-JJ HH:MM:SS (ex: 2024-12-31 ou 2024-12-31 23:59:59).');
       return;
     }
     
