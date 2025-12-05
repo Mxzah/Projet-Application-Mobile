@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
@@ -25,24 +26,6 @@ export default function VendreProduitScreen({ navigation }) {
   const { theme } = useTheme();
   const styles = getCreateAnnonceStyles(theme);
 
-  function handleMettreEnVente() {
-    const userId = authService.currentUser?.id ?? '';
-    setIdUtilisateur(userId);
-
-    const payload = {
-      titre,
-      lieu,
-      description,
-      image,
-      dateFin,
-      prix,
-      cours: coursSelection ?? '',
-      idUtilisateur: userId,
-    };
-
-    console.log('Mettre en vente', payload);
-  }
-
   const [titre, setTitre] = useState("");
   const [lieu, setLieu] = useState("");
   const [description, setDescription] = useState("");
@@ -52,7 +35,95 @@ export default function VendreProduitScreen({ navigation }) {
   const [coursOptions, setCoursOptions] = useState([]);
   const [coursSelection, setCoursSelection] = useState('');
   const [idUtilisateur, setIdUtilisateur] = useState("");
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
+  async function handleMettreEnVente() {
+    setSuccessMessage('');
+    setErrorMessage('');
+
+    if (!titre || titre.trim() === '') {
+      setErrorMessage('Veuillez entrer un titre pour votre annonce.');
+      return;
+    }
+
+    if (!prix || prix.trim() === '' || isNaN(prix) || parseFloat(prix) <= 0) {
+      setErrorMessage('Veuillez entrer un prix valide (supérieur à 0).');
+      return;
+    }
+
+    if (!lieu || lieu.trim() === '') {
+      setErrorMessage('Veuillez entrer un lieu pour votre annonce.');
+      return;
+    }
+
+    if (!dateFin || dateFin.trim() === '') {
+      setErrorMessage('Veuillez entrer une date de fin pour votre annonce.');
+      return;
+    }
+
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateFin)) {
+      setErrorMessage('Le format de la date doit être AAAA-MM-JJ (ex: 2024-12-31).');
+      return;
+    }
+
+    if (!coursSelection || coursSelection === '') {
+      setErrorMessage('Veuillez sélectionner un cours associé.');
+      return;
+    }
+
+    const userId = authService.currentUser?.id ?? '';
+    if (!userId) {
+      setErrorMessage('Vous devez être connecté pour mettre un produit en vente.');
+      return;
+    }
+
+    setIdUtilisateur(userId);
+
+    if (image && image.length > 300000) {
+      setErrorMessage('L\'image est trop grande. Veuillez reprendre une photo avec une qualité plus faible.');
+      return;
+    }
+
+    try {
+      const ok = await marthaService.insertAnnonce(
+        dateFin, 
+        prix, 
+        lieu, 
+        userId, 
+        coursSelection, 
+        1,
+        titre,
+        description || null,
+        image || null
+      );
+      
+      if (!ok) {
+        setErrorMessage('Une erreur est survenue lors de la mise en vente de votre produit. Veuillez réessayer.');
+        return;
+      }
+      
+      setSuccessMessage('Votre produit a été mis en vente avec succès!');
+      setTimeout(() => {
+        navigation.navigate('ListAnnonces');
+        setTitre('');
+        setLieu('');
+        setDescription('');
+        setImage('');
+        setDateFin('');
+        setPrix('');
+        setCoursSelection('');
+        setIdUtilisateur('');
+        setSuccessMessage('');
+        setErrorMessage('');
+      }, 2000);
+    } catch (error) {
+      setErrorMessage('Une erreur est survenue lors de la mise en vente de votre produit. Veuillez réessayer.');
+      console.error('Erreur lors de la mise en vente:', error);
+    }
+  }
+  
   useEffect(() => {
     let isMounted = true;
     marthaService
@@ -74,24 +145,40 @@ export default function VendreProduitScreen({ navigation }) {
   }, []);
 
   async function handleTakePhoto() {
-
     const result = await ImagePicker.launchCameraAsync({
-      quality: 0.1,
+      quality: 0.0000001,
+      allowsEditing: true,
       base64: true,
-      allowsEditing: false,
+      aspect: [4, 3],
+      exif: false,
     });
 
     if (result.canceled) return;
     const asset = result.assets?.[0];
     if (!asset) return;
 
-    try {
-      await MediaLibrary.saveToLibraryAsync(asset.uri);
-    } catch (error) {
-      console.warn('Impossible d’enregistrer la photo', error);
+    const base64Image = asset.base64 ?? '';
+    
+    const MAX_BASE64_LENGTH = 300000;
+    
+    if (base64Image.length > MAX_BASE64_LENGTH) {
+      Alert.alert(
+        'Image trop grande',
+        `L'image est trop grande (${Math.round(base64Image.length / 1024)}KB). Veuillez reprendre une photo.`,
+        [{ text: 'OK' }]
+      );
+      return;
     }
 
-    setImage(asset.base64 ?? '');
+    if (Platform.OS !== 'web' && MediaLibrary.saveToLibraryAsync) {
+      try {
+        await MediaLibrary.saveToLibraryAsync(asset.uri);
+      } catch (error) {
+        console.warn("Impossible d'enregistrer la photo dans la bibliothèque", error);
+      }
+    }
+
+    setImage(base64Image);
   }
 
   return (
@@ -103,6 +190,16 @@ export default function VendreProduitScreen({ navigation }) {
         onPressProgrammes={() => navigation.navigate('Programmes')}
       />
       <View style={{ flex: 1 }}>
+        {successMessage ? (
+          <View style={styles.successContainer}>
+            <Text style={styles.successText}>{successMessage}</Text>
+          </View>
+        ) : null}
+        {errorMessage ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        ) : null}
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -124,7 +221,7 @@ export default function VendreProduitScreen({ navigation }) {
 
                 <Text style={styles.cameraButtonLabel}>Prendre une photo</Text>
               </TouchableOpacity>
-              <Text style={styles.helperText}>L’image est compressée et stockée en base64 (qualité 0.1).</Text>
+              <Text style={styles.helperText}>L'image est fortement compressée (qualité 1%) pour réduire la taille. Maximum 300KB.</Text>
             </View>
 
             <View style={styles.field}>

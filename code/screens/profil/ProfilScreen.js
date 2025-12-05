@@ -49,7 +49,7 @@ export default function ProfilScreen({ navigation, route }) {
     const [offerPrice, setOfferPrice] = useState('');
     const [offerDate, setOfferDate] = useState('');
     const [offerPlace, setOfferPlace] = useState('');
-    const [mesPropositions, setMesPropositions] = useState([]);  // 🔹 nouveau
+    const [mesPropositions, setMesPropositions] = useState([]);
 
 
     const idProfil = route?.params?.id_utilisateur;
@@ -85,7 +85,7 @@ export default function ProfilScreen({ navigation, route }) {
                     const propositions = await marthaService.getPropositionsByUser(idACharger);
                     setMesPropositions(propositions);
                 } else {
-                    setMesPropositions([]); // on vide au cas où
+                    setMesPropositions([]);
                 }
             }
 
@@ -94,7 +94,6 @@ export default function ProfilScreen({ navigation, route }) {
     );
 
     const handleUpdateProposition = async (id_proposition, nouveauStatut) => {
-        // nouveauStatut : 2 = acceptée, 3 = refusée (à adapter à ta lookup)
         const ok = await marthaService.updatePropositionStatut(
             id_proposition,
             nouveauStatut
@@ -102,7 +101,6 @@ export default function ProfilScreen({ navigation, route }) {
 
         if (!ok) return;
 
-        // Mise à jour locale de la liste
         setMesPropositions((prev) =>
             prev.map((p) =>
                 p.id_proposition === id_proposition
@@ -469,8 +467,6 @@ export default function ProfilScreen({ navigation, route }) {
                     </View>
                 </View>
             </Modal>
-
-            {/* Bouton Déconnexion */}
 
             {isOwnProfile && (
                 <View style={styles.logoutWrapper}>

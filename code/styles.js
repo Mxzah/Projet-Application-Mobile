@@ -169,6 +169,34 @@ export const geAnnoncestStyles = (theme) =>
             fontSize: 16,
             color: theme.text,
         },
+        successContainer: {
+            backgroundColor: "#d4edda",
+            borderColor: "#c3e6cb",
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 12,
+            marginTop: 12,
+            marginBottom: 8,
+        },
+        errorContainer: {
+            backgroundColor: "#f8d7da",
+            borderColor: "#f5c6cb",
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 12,
+            marginTop: 12,
+            marginBottom: 8,
+        },
+        successText: {
+            color: "#155724",
+            fontSize: 14,
+            fontWeight: "600",
+        },
+        errorText: {
+            color: "#721c24",
+            fontSize: 14,
+            fontWeight: "600",
+        },
     });
 
 export const getHeaderStyles = (theme) =>
@@ -328,6 +356,36 @@ export const getCreateAnnonceStyles = (theme) =>
         helperText: {
             fontSize: 12,
             color: theme.textLight,
+        },
+        successContainer: {
+            backgroundColor: "#d4edda",
+            borderColor: "#c3e6cb",
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 12,
+            marginTop: 12,
+            marginBottom: 8,
+            marginHorizontal: 20,
+        },
+        errorContainer: {
+            backgroundColor: "#f8d7da",
+            borderColor: "#f5c6cb",
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 12,
+            marginTop: 12,
+            marginBottom: 8,
+            marginHorizontal: 20,
+        },
+        successText: {
+            color: "#155724",
+            fontSize: 14,
+            fontWeight: "600",
+        },
+        errorText: {
+            color: "#721c24",
+            fontSize: 14,
+            fontWeight: "600",
         },
     });
 

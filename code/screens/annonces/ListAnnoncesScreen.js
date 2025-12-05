@@ -37,6 +37,8 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   const [offerPrice, setOfferPrice] = useState('');
   const [offerDate, setOfferDate] = useState('');
   const [offerPlace, setOfferPlace] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const { theme } = useTheme();
   const styles = geAnnoncestStyles(theme);
 
@@ -107,17 +109,46 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     setOfferPrice('');
     setOfferDate('');
     setOfferPlace('');
+    setSuccessMessage('');
+    setErrorMessage('');
   };
 
-  const handleSubmitOffer = () => {
+  const handleSubmitOffer = async () => {
     if (!selectedAnnonce) return;
-    console.log('Nouvelle offre', {
-      annonceId: selectedAnnonce.id_annonce,
-      prix: offerPrice,
-      dateVente: offerDate,
-      lieu: offerPlace,
-    });
-    closeAnnonceDialog();
+    
+    setSuccessMessage('');
+    setErrorMessage('');
+
+    if (offerPrice === '' || offerDate === '' || offerPlace === '') {
+      setErrorMessage('Veuillez remplir tous les champs.');
+      return;
+    }
+
+    if (offerPrice <= 0 || isNaN(offerPrice)) {
+      setErrorMessage('Le prix de l\'offre doit être un nombre supérieur à 0.');
+      return;
+    }
+
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(offerDate)) {
+      setErrorMessage('Le format de la date doit être AAAA-MM-JJ (ex: 2024-12-31).');
+      return;
+    }
+    
+    try {
+      const ok = await marthaService.insertProposition(offerDate, offerPrice, offerPlace, authService.currentUser?.id, selectedAnnonce.id_annonce, 1);
+      if (ok) {
+        setSuccessMessage('Votre offre a été soumise avec succès!');
+        setTimeout(() => {
+          closeAnnonceDialog();
+        }, 2000);
+      } else {
+        setErrorMessage('Une erreur est survenue lors de la soumission de votre offre. Veuillez réessayer.');
+      }
+    } catch (error) {
+      setErrorMessage('Une erreur est survenue lors de la soumission de votre offre. Veuillez réessayer.');
+      console.error('Erreur lors de la soumission de l\'offre:', error);
+    }
   };
 
 
@@ -235,6 +266,18 @@ export default function ListAnnoncesScreen({ navigation, route }) {
                       value={offerPlace}
                       onChangeText={setOfferPlace}
                     />
+
+                    {successMessage ? (
+                      <View style={styles.successContainer}>
+                        <Text style={styles.successText}>{successMessage}</Text>
+                      </View>
+                    ) : null}
+
+                    {errorMessage ? (
+                      <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{errorMessage}</Text>
+                      </View>
+                    ) : null}
 
                     <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
                       <Text style={styles.offerButtonLabel}>FAIRE UNE OFFRE</Text>
