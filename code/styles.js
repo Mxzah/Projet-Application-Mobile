@@ -85,6 +85,7 @@ export const geAnnoncestStyles = (theme) =>
             backgroundColor: theme.card,
             borderRadius: 16,
             maxHeight: "90%",
+            position: "relative",
         },
         dialogScrollContent: {
             padding: 16,
@@ -196,6 +197,26 @@ export const geAnnoncestStyles = (theme) =>
             color: "#721c24",
             fontSize: 14,
             fontWeight: "600",
+        },
+        dialogCloseButton: {
+            position: "absolute",
+            top: 12,
+            right: 12,
+            zIndex: 10,
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: theme.card,
+            borderWidth: 1,
+            borderColor: theme.border,
+            justifyContent: "center",
+            alignItems: "center",
+        },
+        dialogCloseButtonText: {
+            fontSize: 24,
+            color: theme.text,
+            lineHeight: 24,
+            fontWeight: "300",
         },
     });
 
@@ -711,6 +732,7 @@ export const getProfileStyles = (theme) =>
             backgroundColor: theme.card,
             borderRadius: 16,
             maxHeight: "90%",
+            position: "relative",
         },
         dialogScrollContent: {
             padding: 16,

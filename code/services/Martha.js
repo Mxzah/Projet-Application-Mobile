@@ -117,18 +117,24 @@ class MarthaService {
         return response.success;
     }
 
-    async updateAnnonce(id_annonce, date_debut, date_fin, prix_demande, lieu, id_cours, titre, description, image_base64, id_utilisateur = null) {
-        const body = { id_annonce, date_debut, date_fin, prix_demande, lieu, id_cours, titre, description, image_base64 };
-        if (id_utilisateur !== null) {
-            body.id_utilisateur = id_utilisateur;
+    async updateAnnonce(id_annonce, titre, lieu, description, image_base64, date_debut, date_fin, prix_demande, id_cours, id_utilisateur = null) {
+        const body = {
+            id_annonce: Number(id_annonce),
+            titre: String(titre || ''),
+            lieu: String(lieu || ''),
+            description: description ? String(description) : null,
+            image_base64: image_base64 ? String(image_base64) : null,
+            date_debut: String(date_debut || ''),
+            date_fin: String(date_fin || ''),
+            prix_demande: Number(prix_demande),
+            id_cours: id_cours ? Number(id_cours) : null
+        };
+        
+        if (id_utilisateur !== undefined && id_utilisateur !== null) {
+            body.id_utilisateur = Number(id_utilisateur);
         }
-        const response = await this.#executeQuery("update-annonce/execute", body);
-
-        if (!response.success) {
-            console.error('❌ updateAnnonce erreur:', response);
-        }
-
-        return response.success;
+        
+        return await this.#executeQuery("update-annonce/execute", body);
     }
 }
 

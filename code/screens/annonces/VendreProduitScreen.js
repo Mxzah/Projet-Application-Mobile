@@ -9,6 +9,7 @@ import {
   Image,
   Alert,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
@@ -143,14 +144,14 @@ export default function VendreProduitScreen({ navigation, route }) {
         
         ok = await marthaService.updateAnnonce(
           annonceToEdit.id_annonce,
+          titre,
+          lieu,
+          description || null,
+          image || null,
           dateDebut,
           dateFinFormatted,
           parseFloat(prix),
-          lieu,
           idCoursNum,
-          titre,
-          description || null,
-          image || null,
           annonceToEdit.id_utilisateur || userId
         );
       } else {
@@ -202,11 +203,6 @@ export default function VendreProduitScreen({ navigation, route }) {
       .then((data) => {
         if (!isMounted) return;
         setCoursOptions(data.data ?? []);
-        
-        if (annonceToEdit && annonceToEdit.id_cours) {
-          const coursId = annonceToEdit.id_cours;
-          setCoursSelection(String(coursId));
-        }
       })
       .catch((error) => {
         console.warn('Impossible de charger les cours', error);
@@ -228,12 +224,17 @@ export default function VendreProduitScreen({ navigation, route }) {
       setImage(annonceToEdit.image_base64 || "");
       setDateFin(annonceToEdit.date_fin || "");
       setPrix(String(annonceToEdit.prix_demande || ""));
-      if (annonceToEdit.id_cours) {
-        setCoursSelection(String(annonceToEdit.id_cours));
-      }
       setIdUtilisateur(String(annonceToEdit.id_utilisateur || ""));
     }
   }, [annonceToEdit]);
+
+  useEffect(() => {
+    if (annonceToEdit && annonceToEdit.id_cours && coursOptions.length > 0) {
+      const coursId = annonceToEdit.id_cours;
+      const coursIdString = String(coursId);
+      setCoursSelection(coursIdString);
+    }
+  }, [annonceToEdit, coursOptions]);
 
   async function handleTakePhoto() {
     const result = await ImagePicker.launchCameraAsync({
@@ -291,10 +292,16 @@ export default function VendreProduitScreen({ navigation, route }) {
             <Text style={styles.errorText}>{errorMessage}</Text>
           </View>
         ) : null}
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
           <View style={styles.formCard}>
             <Text style={styles.title}>{isEditMode ? 'Modifier votre annonce' : 'Votre annonce'}</Text>
             <Text style={styles.subtitle}>{isEditMode ? 'Modifiez les informations de votre annonce' : 'Complétez ces informations pour publier'}</Text>
@@ -396,6 +403,7 @@ export default function VendreProduitScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );

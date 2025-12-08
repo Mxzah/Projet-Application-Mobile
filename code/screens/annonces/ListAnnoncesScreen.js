@@ -213,6 +213,12 @@ export default function ListAnnoncesScreen({ navigation, route }) {
       >
         <View style={styles.dialogOverlay}>
           <View style={styles.dialogCard}>
+            <TouchableOpacity
+              style={styles.dialogCloseButton}
+              onPress={closeAnnonceDialog}
+            >
+              <Text style={styles.dialogCloseButtonText}>×</Text>
+            </TouchableOpacity>
             <ScrollView
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.dialogScrollContent}
