@@ -52,9 +52,22 @@ export default function ProfilScreen({ navigation, route }) {
     const [offerPlace, setOfferPlace] = useState('');
     const [mesPropositions, setMesPropositions] = useState([]);
 
+    const [mesTransactionsAvis, setMesTransactionsAvis] = useState([]); // propositions acceptées où je peux laisser un avis
+    const [avisModalVisible, setAvisModalVisible] = useState(false);
+    const [editingAvis, setEditingAvis] = useState(null); // { type: 'create' | 'edit', id_avis?, id_proposition }
+    const [avisEnEdition, setAvisEnEdition] = useState(null);
+    const [avisNote, setAvisNote] = useState("5");
+    const [avisCommentaire, setAvisCommentaire] = useState("");
+    const [isAvisModalVisible, setIsAvisModalVisible] = useState(false);
+
+
+
 
     const idProfil = route?.params?.id_utilisateur;
     const isOwnProfile = !idProfil || idProfil === authService.currentUser?.id;
+    const currentUser = authService.currentUser;
+
+
 
     useFocusEffect(
         useCallback(() => {
@@ -65,7 +78,8 @@ export default function ProfilScreen({ navigation, route }) {
                     setUser(null);
                     setMesAvis([]);
                     setMesAnnonces([]);
-                    setMesPropositions([]);
+                    setMesTransactionsAvis([]);
+                    setMesPropositions([]);   // <- pour être propre
                     return;
                 }
 
@@ -82,10 +96,19 @@ export default function ProfilScreen({ navigation, route }) {
                 const annonces = await marthaService.getAnnoncesByUser(idACharger);
                 setMesAnnonces(annonces);
 
-                if (!idProfil || idProfil === authService.currentUser?.id) {
-                    const propositions = await marthaService.getPropositionsByUser(idACharger);
+                // 👉 ICI : chargement des propositions reçues
+                if (!idProfil && authService.currentUser) {
+                    const tx = await marthaService.getTransactionsPourAvis(
+                        authService.currentUser.id
+                    );
+                    setMesTransactionsAvis(tx);
+
+                    const propositions = await marthaService.getPropositionsByUser(
+                        authService.currentUser.id
+                    );
                     setMesPropositions(propositions);
                 } else {
+                    setMesTransactionsAvis([]);
                     setMesPropositions([]);
                 }
             }
@@ -94,13 +117,16 @@ export default function ProfilScreen({ navigation, route }) {
         }, [idProfil])
     );
 
+
+
     const handleUpdateProposition = async (id_proposition, nouveauStatut) => {
         const ok = await marthaService.updatePropositionStatut(
             id_proposition,
             nouveauStatut
         );
 
-        if (!ok) return;
+        if (!ok) return;   // ⬅️ si l'API renvoie success = false, on sort
+        //     => pas de mise à jour locale
 
         setMesPropositions((prev) =>
             prev.map((p) =>
@@ -115,6 +141,9 @@ export default function ProfilScreen({ navigation, route }) {
             )
         );
     };
+
+
+
 
     const handleDeleteAnnonce = async (id_annonce) => {
         Alert.alert(
@@ -176,6 +205,79 @@ export default function ProfilScreen({ navigation, route }) {
         closeAnnonceDialog();
     };
 
+
+
+
+    const openAvisModalFromTransaction = (transaction) => {
+        setEditingAvis({
+            type: transaction.id_avis ? "edit" : "create",
+            id_avis: transaction.id_avis ?? null,
+            id_proposition: transaction.id_proposition,
+        });
+
+        setAvisNote(
+            transaction.note ? String(transaction.note) : "5"
+        );
+        setAvisCommentaire(transaction.commentaire ?? "");
+        setAvisModalVisible(true);
+    };
+
+    const openAvisModalFromAvis = (avis) => {
+        setEditingAvis({
+            type: "edit",
+            id_avis: avis.id_avis,
+            id_proposition: avis.id_proposition, // si ta query le renvoie, sinon tu peux l'ignorer
+        });
+
+        setAvisNote(String(avis.note));
+        setAvisCommentaire(avis.commentaire ?? "");
+        setAvisModalVisible(true);
+    };
+
+    const closeAvisModal = () => {
+        setAvisModalVisible(false);
+        setEditingAvis(null);
+        setAvisNote("5");
+        setAvisCommentaire("");
+    };
+
+    const handleSaveAvis = async () => {
+        if (!avisEnEdition) return;
+
+        const noteNumber = Number(avisNote);
+        if (!Number.isFinite(noteNumber) || noteNumber < 1 || noteNumber > 5) {
+            alert("La note doit être entre 1 et 5.");
+            return;
+        }
+
+        const ok = await marthaService.updateAvis({
+            id_avis: avisEnEdition.id_avis,
+            id_noteur: authService.currentUser.id,
+            note: noteNumber,
+            commentaire: String(avisCommentaire),
+        });
+
+        if (!ok) {
+            alert("Impossible de mettre à jour l'avis.");
+            return;
+        }
+
+        // mise à jour locale de la liste
+        setMesAvis((prev) =>
+            prev.map((a) =>
+                a.id_avis === avisEnEdition.id_avis
+                    ? {
+                        ...a,
+                        note: noteNumber,
+                        commentaire: avisCommentaire,
+                        date_avis: new Date().toISOString(), // pour rafraîchir la date
+                    }
+                    : a
+            )
+        );
+
+        setAvisEnEdition(null);
+    };
 
 
 
@@ -245,6 +347,9 @@ export default function ProfilScreen({ navigation, route }) {
     const renderAvis = ({ item }) => {
         const stars = "★".repeat(item.note) + "☆".repeat(5 - item.note);
         const dateTexte = new Date(item.date_avis).toLocaleDateString();
+        const currentUserId = authService.currentUser?.id;
+
+        const estMonAvis = item.id_noteur === currentUserId;
 
         return (
             <View style={[styles.avisCard, { backgroundColor: theme.card }]}>
@@ -262,11 +367,26 @@ export default function ProfilScreen({ navigation, route }) {
                     <Text style={[styles.avisMeta, { color: theme.primary }]}>
                         Le {dateTexte} • par {item.noteur_prenom} {item.noteur_nom}
                     </Text>
-
                 </TouchableOpacity>
+
+                {estMonAvis && (
+                    <TouchableOpacity
+                        style={styles.btnEditAvis}
+                        onPress={() => {
+                            setAvisEnEdition(item);
+                            setAvisNote(String(item.note));
+                            setAvisCommentaire(item.commentaire || "");
+                        }}
+                    >
+                        <Text style={styles.btnEditAvisText}>Modifier</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         );
     };
+
+
+
 
     const renderAnnonce = ({ item }) => {
         const debut = item.date_debut
@@ -345,6 +465,8 @@ export default function ProfilScreen({ navigation, route }) {
         );
     };
 
+
+
     return (
         <ScrollView
             style={styles.container}
@@ -404,6 +526,59 @@ export default function ProfilScreen({ navigation, route }) {
 
             {isOwnProfile && (
                 <>
+                    <Text style={styles.sectionTitle}>Transactions à évaluer</Text>
+                    {mesTransactionsAvis.length === 0 ? (
+                        <View style={styles.emptyBox}>
+                            <Text style={styles.emptyText}>
+                                Aucune transaction à évaluer pour l’instant.
+                            </Text>
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={mesTransactionsAvis}
+                            keyExtractor={(item) => String(item.id_proposition)}
+                            renderItem={({ item }) => {
+                                const dateTexte = new Date(
+                                    item.date_proposition
+                                ).toLocaleDateString();
+                                const prixTexte = formatPrice(item.prix);
+                                const aDejaAvis = !!item.id_avis;
+
+                                return (
+                                    <View style={styles.propositionCard}>
+                                        <Text style={styles.propositionTitre}>
+                                            {item.titre_annonce}
+                                        </Text>
+                                        <Text style={styles.propositionLigne}>
+                                            Vendeur : {item.vendeur_prenom} {item.vendeur_nom}
+                                        </Text>
+                                        <Text style={styles.propositionLigne}>
+                                            Prix : {prixTexte} $
+                                        </Text>
+                                        <Text style={styles.propositionMeta}>
+                                            Acceptée le {dateTexte}
+                                        </Text>
+
+                                        <TouchableOpacity
+                                            style={styles.btnAvis}
+                                            onPress={() => openAvisModalFromTransaction(item)}
+                                        >
+                                            <Text style={styles.btnAvisText}>
+                                                {aDejaAvis ? "Modifier mon avis" : "Laisser un avis"}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                );
+                            }}
+                            scrollEnabled={false}
+                        />
+                    )}
+                </>
+            )}
+
+
+            {isOwnProfile && (
+                <>
                     <Text style={styles.sectionTitle}>Propositions reçues</Text>
                     {mesPropositions.length === 0 ? (
                         <View style={styles.emptyBox}>
@@ -424,7 +599,6 @@ export default function ProfilScreen({ navigation, route }) {
 
 
 
-            <Text style={styles.sectionTitle}>Annonces</Text>
             {mesAnnonces.length === 0 ? (
                 <View style={styles.emptyBox}>
                     <Text style={styles.emptyText}>Aucune annonce pour l’instant.</Text>
@@ -519,6 +693,53 @@ export default function ProfilScreen({ navigation, route }) {
                     </View>
                 </View>
             </Modal>
+
+            <Modal
+                visible={!!avisEnEdition}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setAvisEnEdition(null)}
+            >
+                <View style={styles.dialogOverlay}>
+                    <View style={styles.dialogCard}>
+                        <Text style={styles.dialogTitle}>Modifier mon avis</Text>
+
+                        <Text style={styles.dialogLabel}>Note (1 à 5)</Text>
+                        <TextInput
+                            style={styles.dialogInput}
+                            keyboardType="numeric"
+                            value={avisNote}
+                            onChangeText={setAvisNote}
+                        />
+
+                        <Text style={[styles.dialogLabel, { marginTop: 12 }]}>
+                            Commentaire
+                        </Text>
+                        <TextInput
+                            style={[styles.dialogInput, styles.dialogTextarea]}
+                            multiline
+                            value={avisCommentaire}
+                            onChangeText={setAvisCommentaire}
+                        />
+
+                        <View style={styles.dialogButtonsRow}>
+                            <TouchableOpacity
+                                style={styles.offerButton}
+                                onPress={handleSaveAvis}
+                            >
+                                <Text style={styles.offerButtonLabel}>Enregistrer</Text>
+                            </TouchableOpacity>
+
+                            <Button
+                                title="Annuler"
+                                onPress={() => setAvisEnEdition(null)}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+
 
             {isOwnProfile && (
                 <View style={styles.logoutWrapper}>

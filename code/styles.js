@@ -916,5 +916,62 @@ export const getProfileStyles = (theme) =>
             fontWeight: "600",
             fontSize: 12,
         },
+        propositionCard: {
+            backgroundColor: theme.card,
+            marginHorizontal: 18,
+            marginVertical: 6,
+            padding: 14,
+            borderRadius: 12,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: theme.border,
+        },
+        propositionTitre: {
+            fontSize: 16,
+            fontWeight: "700",
+            color: theme.text,
+            marginBottom: 4,
+        },
+        propositionLigne: {
+            fontSize: 14,
+            color: theme.textLight,
+        },
+        propositionMeta: {
+            marginTop: 6,
+            fontSize: 12,
+            color: theme.textLight,
+        },
+        propositionActions: {
+            flexDirection: "row",
+            marginTop: 10,
+            gap: 8,
+        },
+        btnAvis: {
+            marginTop: 10,
+            alignSelf: "flex-start",
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 999,
+            backgroundColor: theme.primary,
+        },
+        btnAvisText: {
+            color: theme.buttonText,
+            fontWeight: "600",
+            fontSize: 13,
+        },
+        btnAvisInline: {
+            marginTop: 8,
+            alignSelf: "flex-start",
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+            borderRadius: 999,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: theme.primary,
+        },
+        btnAvisInlineText: {
+            color: theme.primary,
+            fontWeight: "600",
+            fontSize: 12,
+        },
+
 
     });

@@ -27,6 +27,51 @@ class MarthaService {
         return response.data;
     }
 
+    // 🔹 NOUVEAU : transactions (propositions acceptées) où le user peut écrire/modifier un avis
+    async getTransactionsPourAvis(id_utilisateur) {
+        const response = await this.#executeQuery(
+            "select-propositions-pour-avis/execute",
+            { id_utilisateur }
+        );
+
+        return response.success ? response.data : [];
+    }
+
+    // 🔹 NOUVEAU : créer un avis pour une proposition
+    async createAvis({ id_proposition, id_noteur, note, commentaire }) {
+        const response = await this.#executeQuery(
+            "insert-avis-pour-proposition/execute",
+            {
+                id_proposition,
+                id_noteur,
+                note,
+                commentaire,
+            }
+        );
+
+        return response.success;
+    }
+
+    // 🔹 NOUVEAU : modifier un avis existant
+
+    async updateAvis({ id_avis, id_noteur, note, commentaire }) {
+        const response = await this.#executeQuery("update-avis/execute", {
+            note,
+            commentaire,
+            id_avis,
+            id_noteur,
+        });
+
+        if (!response.success) {
+            console.error("❌ updateAvis erreur:", response);
+        }
+
+        return response.success;
+    }
+
+
+
+
     async getUserById(id_utilisateur) {
         const response = await this.#executeQuery("select-user-by-id/execute", { id_utilisateur });
 
@@ -90,7 +135,7 @@ class MarthaService {
             const now = new Date();
             date_debut = now.toISOString().split('T')[0];
         }
-        
+
         const response = await this.#executeQuery("insert-annonce/execute", {
             date_debut,
             date_fin,
@@ -129,11 +174,11 @@ class MarthaService {
             prix_demande: Number(prix_demande),
             id_cours: id_cours ? Number(id_cours) : null
         };
-        
+
         if (id_utilisateur !== undefined && id_utilisateur !== null) {
             body.id_utilisateur = Number(id_utilisateur);
         }
-        
+
         return await this.#executeQuery("update-annonce/execute", body);
     }
 }
