@@ -17,6 +17,7 @@ import { useTheme } from "/home/etd/Projet-Application-Mobile/code/context/Theme
 import marthaService from "../../services/Martha";
 import { useAuth } from "../../context/AuthContext";
 import { getProfileStyles } from "../../styles";
+import Proposition from "./Proposition.model";
 
 
 
@@ -77,7 +78,7 @@ export default function ProfilScreen({ navigation, route }) {
                     setMesAvis([]);
                     setMesAnnonces([]);
                     setMesTransactionsAvis([]);
-                    setMesPropositions([]);   // <- pour être propre
+                    setMesPropositions([]);   
                     return;
                 }
 
@@ -103,7 +104,9 @@ export default function ProfilScreen({ navigation, route }) {
                     const propositions = await marthaService.getPropositionsByUser(
                         currentUser.id
                     );
-                    setMesPropositions(propositions);
+                    setMesPropositions(
+                        (propositions ?? []).map(Proposition.fromApi)
+                    );
                 } else {
                     setMesTransactionsAvis([]);
                     setMesPropositions([]);
@@ -127,12 +130,11 @@ export default function ProfilScreen({ navigation, route }) {
         setMesPropositions((prev) =>
             prev.map((p) =>
                 p.id_proposition === id_proposition
-                    ? {
-                        ...p,
+                    ? p.cloneWith({
                         id_statut: nouveauStatut,
                         statut_description:
                             nouveauStatut === 2 ? "acceptée" : "refusée",
-                    }
+                    })
                     : p
             )
         );
@@ -222,7 +224,7 @@ export default function ProfilScreen({ navigation, route }) {
         setEditingAvis({
             type: "edit",
             id_avis: avis.id_avis,
-            id_proposition: avis.id_proposition, // si ta query le renvoie, sinon tu peux l'ignorer
+            id_proposition: avis.id_proposition,
         });
 
         setAvisNote(String(avis.note));
@@ -263,7 +265,6 @@ export default function ProfilScreen({ navigation, route }) {
             return;
         }
 
-        // mise à jour locale de la liste
         setMesAvis((prev) =>
             prev.map((a) =>
                 a.id_avis === avisEnEdition.id_avis
@@ -271,7 +272,7 @@ export default function ProfilScreen({ navigation, route }) {
                         ...a,
                         note: noteNumber,
                         commentaire: avisCommentaire,
-                        date_avis: new Date().toISOString(), // pour rafraîchir la date
+                        date_avis: new Date().toISOString(),
                     }
                     : a
             )
@@ -293,14 +294,9 @@ export default function ProfilScreen({ navigation, route }) {
     }
 
     const renderProposition = ({ item }) => {
-        const dateTexte = new Date(item.date_proposition).toLocaleDateString();
-        const prixNumber = Number(item.prix);
-        const prixTexte = Number.isFinite(prixNumber)
-            ? `${prixNumber.toFixed(2)} $`
-            : `${item.prix ?? ""} $`;
-
-        const enAttente =
-            item.id_statut === 1 || item.statut_description === "en attente";
+        const dateTexte = item.formattedDate;
+        const prixTexte = `${item.formattedPrice} $`;
+        const enAttente = item.isPending;
 
         return (
             <View style={styles.propositionCard}>
@@ -309,7 +305,7 @@ export default function ProfilScreen({ navigation, route }) {
                 </Text>
 
                 <Text style={styles.propositionLigne}>
-                    De : {item.acheteur_prenom} {item.acheteur_nom}
+                    De : {item.buyerFullName}
                 </Text>
 
                 <Text style={styles.propositionLigne}>
