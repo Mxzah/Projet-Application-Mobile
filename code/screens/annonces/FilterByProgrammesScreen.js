@@ -3,11 +3,9 @@ import { View, Text, StyleSheet, Button, FlatList, TouchableOpacity } from 'reac
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
-import MarthaService from '../../services/Martha';
+import marthaService from '../../services/Martha';
 import { getProgrammesStyles } from '../../styles';
 import { useTheme } from "../../context/ThemeContext";
-
-const marthaService = new MarthaService();
 
 export default function FilterByProgrammesScreen({ navigation, route }) {
   const { theme } = useTheme();

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, ActivityIndicator, Alert } from 'react-native';
-import authService from '../../services/Auth';
+import { useAuth } from '../../context/AuthContext';
 
 export default function SignUpScreen({ navigation }) {
   const [nom, setNom] = useState('');
@@ -8,6 +8,7 @@ export default function SignUpScreen({ navigation }) {
   const [courriel, setCourriel] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signUp } = useAuth();
 
   const handleSignUp = async () => {
     if (!nom || !prenom || !courriel || !motDePasse) {
@@ -18,7 +19,7 @@ export default function SignUpScreen({ navigation }) {
     try {
       setIsSubmitting(true);
 
-      const success = await authService.signUp({
+      const success = await signUp({
         nom,
         prenom,
         courriel,

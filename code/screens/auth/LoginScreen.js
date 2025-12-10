@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert, ActivityIndicator } from "react-native";
-import authService from "../../services/Auth";
+import { useAuth } from "../../context/AuthContext";
 
 export default function LoginScreen({ navigation }) {
   const [courriel, setCourriel] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
   const [loading, setLoading] = useState(false);
+  const { logIn } = useAuth();
 
   const handleLogin = async () => {
     if (!courriel || !motDePasse) {
@@ -16,7 +17,7 @@ export default function LoginScreen({ navigation }) {
     try {
       setLoading(true);
 
-      const success = await authService.logIn({
+      const success = await logIn({
         courriel,
         mot_de_passe: motDePasse
       });

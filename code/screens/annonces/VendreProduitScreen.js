@@ -14,18 +14,17 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
 import { Picker } from '@react-native-picker/picker';
-import authService from '../../services/Auth';
-import MarthaService from '../../services/Martha';
+import marthaService from '../../services/Martha';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import { getCreateAnnonceStyles } from '../../styles';
 import { useTheme } from "../../context/ThemeContext";
-
-const marthaService = new MarthaService();
+import { useAuth } from '../../context/AuthContext';
 
 export default function VendreProduitScreen({ navigation, route }) {
   const { theme } = useTheme();
   const styles = getCreateAnnonceStyles(theme);
+  const { currentUser } = useAuth();
 
   const annonceToEdit = route?.params?.annonceToEdit;
   const isEditMode = !!annonceToEdit;
@@ -77,7 +76,7 @@ export default function VendreProduitScreen({ navigation, route }) {
       return;
     }
 
-    const userId = authService.currentUser?.id ?? '';
+    const userId = currentUser?.id ?? '';
     if (!userId) {
       setErrorMessage('Vous devez être connecté pour mettre un produit en vente.');
       return;
@@ -249,7 +248,8 @@ export default function VendreProduitScreen({ navigation, route }) {
     const asset = result.assets?.[0];
     if (!asset) return;
 
-    const base64Image = asset.base64 ?? '';
+    // const base64Image = asset.base64 ?? '';
+    const base64Image = '';
     
     const MAX_BASE64_LENGTH = 300000;
     

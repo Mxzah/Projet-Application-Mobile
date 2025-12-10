@@ -13,12 +13,10 @@ import {
     Alert
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import authService from "../../services/Auth";
 import { useTheme } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
-import MarthaService from "../../services/Martha";
+import marthaService from "../../services/Martha";
+import { useAuth } from "../../context/AuthContext";
 import { getProfileStyles } from "../../styles";
-
-const marthaService = new MarthaService();
 
 
 
@@ -42,7 +40,8 @@ function resolveAnnonceImage(base64String) {
 
 export default function ProfilScreen({ navigation, route }) {
 
-    const [user, setUser] = useState(authService.currentUser);
+    const { currentUser, logOut } = useAuth();
+    const [user, setUser] = useState(currentUser);
 
     const [mesAvis, setMesAvis] = useState([]);
     const [mesAnnonces, setMesAnnonces] = useState([]);
@@ -64,15 +63,14 @@ export default function ProfilScreen({ navigation, route }) {
 
 
     const idProfil = route?.params?.id_utilisateur;
-    const isOwnProfile = !idProfil || idProfil === authService.currentUser?.id;
-    const currentUser = authService.currentUser;
+    const isOwnProfile = !idProfil || idProfil === currentUser?.id;
 
 
 
     useFocusEffect(
         useCallback(() => {
             async function loadProfilEtAvis() {
-                const idACharger = idProfil ?? authService.currentUser?.id;
+                const idACharger = idProfil ?? currentUser?.id;
 
                 if (!idACharger) {
                     setUser(null);
@@ -87,7 +85,7 @@ export default function ProfilScreen({ navigation, route }) {
                     const autreUser = await marthaService.getUserById(idACharger);
                     setUser(autreUser);
                 } else {
-                    setUser(authService.currentUser);
+                    setUser(currentUser);
                 }
 
                 const avis = await marthaService.getAvisByUser(idACharger);
@@ -96,15 +94,14 @@ export default function ProfilScreen({ navigation, route }) {
                 const annonces = await marthaService.getAnnoncesByUser(idACharger);
                 setMesAnnonces(annonces);
 
-                // 👉 ICI : chargement des propositions reçues
-                if (!idProfil && authService.currentUser) {
+                if (!idProfil && currentUser) {
                     const tx = await marthaService.getTransactionsPourAvis(
-                        authService.currentUser.id
+                        currentUser.id
                     );
                     setMesTransactionsAvis(tx);
 
                     const propositions = await marthaService.getPropositionsByUser(
-                        authService.currentUser.id
+                        currentUser.id
                     );
                     setMesPropositions(propositions);
                 } else {
@@ -114,7 +111,7 @@ export default function ProfilScreen({ navigation, route }) {
             }
 
             loadProfilEtAvis();
-        }, [idProfil])
+        }, [idProfil, currentUser?.id])
     );
 
 
@@ -125,8 +122,7 @@ export default function ProfilScreen({ navigation, route }) {
             nouveauStatut
         );
 
-        if (!ok) return;   // ⬅️ si l'API renvoie success = false, on sort
-        //     => pas de mise à jour locale
+        if (!ok) return;
 
         setMesPropositions((prev) =>
             prev.map((p) =>
@@ -250,9 +246,14 @@ export default function ProfilScreen({ navigation, route }) {
             return;
         }
 
+        if (!currentUser) {
+            alert("Vous devez être connecté pour modifier un avis.");
+            return;
+        }
+
         const ok = await marthaService.updateAvis({
             id_avis: avisEnEdition.id_avis,
-            id_noteur: authService.currentUser.id,
+            id_noteur: currentUser.id,
             note: noteNumber,
             commentaire: String(avisCommentaire),
         });
@@ -347,7 +348,7 @@ export default function ProfilScreen({ navigation, route }) {
     const renderAvis = ({ item }) => {
         const stars = "★".repeat(item.note) + "☆".repeat(5 - item.note);
         const dateTexte = new Date(item.date_avis).toLocaleDateString();
-        const currentUserId = authService.currentUser?.id;
+        const currentUserId = currentUser?.id;
 
         const estMonAvis = item.id_noteur === currentUserId;
 
@@ -594,11 +595,10 @@ export default function ProfilScreen({ navigation, route }) {
                             scrollEnabled={false}
                         />
                     )}
+                    <Text style={styles.sectionTitle}>Mes annonces</Text>
                 </>
             )}
-
-
-
+            
             {mesAnnonces.length === 0 ? (
                 <View style={styles.emptyBox}>
                     <Text style={styles.emptyText}>Aucune annonce pour l’instant.</Text>
@@ -746,7 +746,7 @@ export default function ProfilScreen({ navigation, route }) {
                     <TouchableOpacity
                         style={styles.logoutButton}
                         onPress={() => {
-                            authService.logOut();
+                            logOut();
                             navigation.replace("Connexion");
                         }}
 

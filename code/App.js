@@ -8,13 +8,15 @@ import VendreProduitScreen from './screens/annonces/VendreProduitScreen';
 import FilterByProgrammesScreen from './screens/annonces/FilterByProgrammesScreen';
 import ProfilScreen from './screens/profil/ProfilScreen';
 import { ThemeProvider } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
+import { AuthProvider } from './context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Connexion" screenOptions={{ headerShown: false }}>
             <Stack.Screen
@@ -43,7 +45,8 @@ export default function App() {
             />
           </Stack.Navigator>
         </NavigationContainer>
-      </ThemeProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

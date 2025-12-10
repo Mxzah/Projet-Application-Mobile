@@ -2,12 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { View, Text, Button, FlatList, Image, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
-import MarthaService from '../../services/Martha';
-import authService from '../../services/Auth';
+import marthaService from '../../services/Martha';
 import { geAnnoncestStyles } from '../../styles';
 import { useTheme } from "../../context/ThemeContext";
-
-const marthaService = new MarthaService();
+import { useAuth } from '../../context/AuthContext';
 
 
 
@@ -40,6 +38,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const { theme } = useTheme();
+  const { currentUser } = useAuth();
   const styles = geAnnoncestStyles(theme);
 
   useEffect(() => {
@@ -74,7 +73,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   }, [route?.params?.filteredCoursIds]);
 
   const filteredAnnonces = useMemo(() => {
-    const currentUserId = authService.currentUser?.id;
+    const currentUserId = currentUser?.id;
     let filtered = annonces;
 
     if (currentUserId) {
@@ -136,7 +135,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     }
     
     try {
-      const ok = await marthaService.insertProposition(offerDate, offerPrice, offerPlace, authService.currentUser?.id, selectedAnnonce.id_annonce, 1);
+      const ok = await marthaService.insertProposition(offerDate, offerPrice, offerPlace, currentUser?.id, selectedAnnonce.id_annonce, 1);
       if (ok) {
         setSuccessMessage('Votre offre a été soumise avec succès!');
         setTimeout(() => {
