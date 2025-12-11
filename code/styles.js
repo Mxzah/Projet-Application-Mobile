@@ -972,6 +972,67 @@ export const getProfileStyles = (theme) =>
             fontWeight: "600",
             fontSize: 12,
         },
+        tabsContainer: {
+            flexDirection: "row",
+            marginHorizontal: 16,
+            marginBottom: 12,
+            marginTop: 16,
+            borderRadius: 20,
+            overflow: "hidden",
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+
+        tabButton: {
+            flex: 1,
+            paddingVertical: 8,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: theme.card,
+        },
+
+        tabButtonActive: {
+            backgroundColor: theme.primary,
+        },
+
+        tabButtonText: {
+            fontSize: 14,
+            color: theme.text,
+
+        },
+
+        tabButtonTextActive: {
+            color: "#fff",
+            fontWeight: "600",
+        },
+        btnEditAvis: {
+            backgroundColor: "#3b82f6",
+            marginTop: 8,
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            borderRadius: 6,
+            flex: 1,
+            alignItems: "center",
+        },
+        btnEditAvisText: {
+            color: "#fff",
+            fontWeight: "600",
+            fontSize: 12,
+        },
+        backButton: {
+            position: "absolute",
+            top: 10,
+            left: 10,
+            padding: 8,
+            zIndex: 10,
+        },
+
+        backButtonText: {
+            fontSize: 28,
+            fontWeight: "bold",
+            color: theme.text, // ou blanc si thème sombre
+        },
+
 
 
     });

@@ -55,10 +55,10 @@ export default function ProfilScreen({ navigation, route }) {
     const [mesTransactionsAvis, setMesTransactionsAvis] = useState([]); // propositions acceptées où je peux laisser un avis
     const [avisModalVisible, setAvisModalVisible] = useState(false);
     const [editingAvis, setEditingAvis] = useState(null); // { type: 'create' | 'edit', id_avis?, id_proposition }
-    const [avisEnEdition, setAvisEnEdition] = useState(null);
     const [avisNote, setAvisNote] = useState("5");
     const [avisCommentaire, setAvisCommentaire] = useState("");
-    const [isAvisModalVisible, setIsAvisModalVisible] = useState(false);
+    const [activeTab, setActiveTab] = useState("infos");
+
 
 
 
@@ -78,7 +78,7 @@ export default function ProfilScreen({ navigation, route }) {
                     setMesAvis([]);
                     setMesAnnonces([]);
                     setMesTransactionsAvis([]);
-                    setMesPropositions([]);   
+                    setMesPropositions([]);
                     return;
                 }
 
@@ -117,6 +117,29 @@ export default function ProfilScreen({ navigation, route }) {
         }, [idProfil, currentUser?.id])
     );
 
+
+    const renderTabButton = (key, label) => {
+        const isActive = activeTab === key;
+        return (
+            <TouchableOpacity
+                key={key}
+                style={[
+                    styles.tabButton,
+                    isActive && styles.tabButtonActive,
+                ]}
+                onPress={() => setActiveTab(key)}
+            >
+                <Text
+                    style={[
+                        styles.tabButtonText,
+                        isActive && styles.tabButtonTextActive,
+                    ]}
+                >
+                    {label}
+                </Text>
+            </TouchableOpacity>
+        );
+    };
 
 
     const handleUpdateProposition = async (id_proposition, nouveauStatut) => {
@@ -220,6 +243,7 @@ export default function ProfilScreen({ navigation, route }) {
         setAvisModalVisible(true);
     };
 
+
     const openAvisModalFromAvis = (avis) => {
         setEditingAvis({
             type: "edit",
@@ -232,6 +256,7 @@ export default function ProfilScreen({ navigation, route }) {
         setAvisModalVisible(true);
     };
 
+
     const closeAvisModal = () => {
         setAvisModalVisible(false);
         setEditingAvis(null);
@@ -239,8 +264,9 @@ export default function ProfilScreen({ navigation, route }) {
         setAvisCommentaire("");
     };
 
+
     const handleSaveAvis = async () => {
-        if (!avisEnEdition) return;
+        if (!editingAvis) return;
 
         const noteNumber = Number(avisNote);
         if (!Number.isFinite(noteNumber) || noteNumber < 1 || noteNumber > 5) {
@@ -249,37 +275,65 @@ export default function ProfilScreen({ navigation, route }) {
         }
 
         if (!currentUser) {
-            alert("Vous devez être connecté pour modifier un avis.");
+            alert("Vous devez être connecté pour laisser un avis.");
             return;
         }
 
-        const ok = await marthaService.updateAvis({
-            id_avis: avisEnEdition.id_avis,
-            id_noteur: currentUser.id,
-            note: noteNumber,
-            commentaire: String(avisCommentaire),
-        });
+        let ok = false;
 
-        if (!ok) {
-            alert("Impossible de mettre à jour l'avis.");
-            return;
+        if (editingAvis.type === "create") {
+            ok = await marthaService.createAvis({
+                id_proposition: editingAvis.id_proposition,
+                id_noteur: currentUser.id,
+                note: noteNumber,
+                commentaire: String(avisCommentaire),
+            });
+
+            if (!ok) {
+                alert("Impossible d'enregistrer l'avis.");
+                return;
+            }
+
+            const [tx, avis] = await Promise.all([
+                marthaService.getTransactionsPourAvis(currentUser.id),
+                marthaService.getAvisByUser(currentUser.id),
+            ]);
+            setMesTransactionsAvis(tx);
+            setMesAvis(avis);
+
+        } else if (editingAvis.type === "edit") {
+            ok = await marthaService.updateAvis({
+                id_avis: editingAvis.id_avis,
+                id_noteur: currentUser.id,
+                note: noteNumber,
+                commentaire: String(avisCommentaire),
+            });
+
+            if (!ok) {
+                alert("Impossible de mettre à jour l'avis.");
+                return;
+            }
+
+            setMesAvis((prev) =>
+                prev.map((a) =>
+                    a.id_avis === editingAvis.id_avis
+                        ? {
+                            ...a,
+                            note: noteNumber,
+                            commentaire: avisCommentaire,
+                            date_avis: new Date().toISOString(),
+                        }
+                        : a
+                )
+            );
+
+            const tx = await marthaService.getTransactionsPourAvis(currentUser.id);
+            setMesTransactionsAvis(tx);
         }
 
-        setMesAvis((prev) =>
-            prev.map((a) =>
-                a.id_avis === avisEnEdition.id_avis
-                    ? {
-                        ...a,
-                        note: noteNumber,
-                        commentaire: avisCommentaire,
-                        date_avis: new Date().toISOString(),
-                    }
-                    : a
-            )
-        );
-
-        setAvisEnEdition(null);
+        closeAvisModal();
     };
+
 
 
 
@@ -341,6 +395,158 @@ export default function ProfilScreen({ navigation, route }) {
         );
     };
 
+    const renderActiveTab = () => {
+        switch (activeTab) {
+            case "infos":
+                return (
+                    <View style={styles.infoSection}>
+                        <Text style={styles.infoLabel}>Nom complet</Text>
+                        <Text style={styles.infoValue}>
+                            {user.prenom} {user.nom}
+                        </Text>
+
+                        <Text style={[styles.infoLabel, { marginTop: 12 }]}>
+                            Courriel
+                        </Text>
+                        <Text style={styles.infoValue}>
+                            {user.courriel ?? user.username}
+                        </Text>
+
+                        <Text style={[styles.infoLabel, { marginTop: 12 }]}>
+                            ID utilisateur
+                        </Text>
+                        <Text style={styles.infoValue}>
+                            {user.id_utilisateur ?? user.id}
+                        </Text>
+                    </View>
+                );
+
+            case "transactions":
+                if (!isOwnProfile) return null;
+                return (
+                    <>
+                        <Text style={styles.sectionTitle}>Transactions à évaluer</Text>
+                        {mesTransactionsAvis.length === 0 ? (
+                            <View style={styles.emptyBox}>
+                                <Text style={styles.emptyText}>
+                                    Aucune transaction à évaluer pour l’instant.
+                                </Text>
+                            </View>
+                        ) : (
+                            <FlatList
+                                data={mesTransactionsAvis}
+                                keyExtractor={(item) => String(item.id_proposition)}
+                                renderItem={({ item }) => {
+                                    const dateTexte = new Date(
+                                        item.date_proposition
+                                    ).toLocaleDateString();
+                                    const prixTexte = formatPrice(item.prix);
+                                    const aDejaAvis = !!item.id_avis;
+
+                                    return (
+                                        <View style={styles.propositionCard}>
+                                            <Text style={styles.propositionTitre}>
+                                                {item.titre_annonce}
+                                            </Text>
+                                            <Text style={styles.propositionLigne}>
+                                                Vendeur : {item.vendeur_prenom} {item.vendeur_nom}
+                                            </Text>
+                                            <Text style={styles.propositionLigne}>
+                                                Prix : {prixTexte} $
+                                            </Text>
+                                            <Text style={styles.propositionMeta}>
+                                                Acceptée le {dateTexte}
+                                            </Text>
+
+                                            <TouchableOpacity
+                                                style={styles.btnAvis}
+                                                onPress={() => openAvisModalFromTransaction(item)}
+                                            >
+                                                <Text style={styles.btnAvisText}>
+                                                    {aDejaAvis
+                                                        ? "Modifier mon avis"
+                                                        : "Laisser un avis"}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    );
+                                }}
+                                scrollEnabled={false}
+                            />
+                        )}
+                    </>
+                );
+
+            case "propositions":
+                if (!isOwnProfile) return null;
+                return (
+                    <>
+                        <Text style={styles.sectionTitle}>Propositions reçues</Text>
+                        {mesPropositions.length === 0 ? (
+                            <View style={styles.emptyBox}>
+                                <Text style={styles.emptyText}>
+                                    Aucune proposition pour l’instant.
+                                </Text>
+                            </View>
+                        ) : (
+                            <FlatList
+                                data={mesPropositions}
+                                keyExtractor={(item) => String(item.id_proposition)}
+                                renderItem={renderProposition}
+                                scrollEnabled={false}
+                            />
+                        )}
+                    </>
+                );
+
+            case "annonces":
+                return (
+                    <>
+                        <Text style={styles.sectionTitle}>Mes annonces</Text>
+                        {mesAnnonces.length === 0 ? (
+                            <View style={styles.emptyBox}>
+                                <Text style={styles.emptyText}>
+                                    Aucune annonce pour l’instant.
+                                </Text>
+                            </View>
+                        ) : (
+                            <FlatList
+                                data={mesAnnonces}
+                                keyExtractor={(item) => String(item.id_annonce)}
+                                renderItem={renderAnnonce}
+                                scrollEnabled={false}
+                            />
+                        )}
+                    </>
+                );
+
+            case "avis":
+                return (
+                    <>
+                        <Text style={styles.sectionTitle}>Avis</Text>
+                        {mesAvis.length === 0 ? (
+                            <View style={styles.emptyBox}>
+                                <Text style={styles.emptyText}>
+                                    Aucun avis pour l’instant.
+                                </Text>
+                            </View>
+                        ) : (
+                            <FlatList
+                                data={mesAvis}
+                                keyExtractor={(item) => String(item.id_avis)}
+                                renderItem={renderAvis}
+                                scrollEnabled={false}
+                            />
+                        )}
+                    </>
+                );
+
+            default:
+                return null;
+        }
+    };
+
+
     const renderAvis = ({ item }) => {
         const stars = "★".repeat(item.note) + "☆".repeat(5 - item.note);
         const dateTexte = new Date(item.date_avis).toLocaleDateString();
@@ -369,15 +575,12 @@ export default function ProfilScreen({ navigation, route }) {
                 {estMonAvis && (
                     <TouchableOpacity
                         style={styles.btnEditAvis}
-                        onPress={() => {
-                            setAvisEnEdition(item);
-                            setAvisNote(String(item.note));
-                            setAvisCommentaire(item.commentaire || "");
-                        }}
+                        onPress={() => openAvisModalFromAvis(item)}
                     >
                         <Text style={styles.btnEditAvisText}>Modifier</Text>
                     </TouchableOpacity>
                 )}
+
             </View>
         );
     };
@@ -470,6 +673,14 @@ export default function ProfilScreen({ navigation, route }) {
             contentContainerStyle={styles.scrollContent}
         >
             <View style={styles.header}>
+                {!isOwnProfile && (
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Text style={styles.backButtonText}>←</Text>
+                    </TouchableOpacity>
+                )}
                 <TouchableOpacity
                     onPress={toggleTheme}
                     style={styles.themeToggleButton}
@@ -500,127 +711,17 @@ export default function ProfilScreen({ navigation, route }) {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.infoSection}>
-                <Text style={styles.infoLabel}>Nom complet</Text>
-                <Text style={styles.infoValue}>
-                    {user.prenom} {user.nom}
-                </Text>
-
-                <Text style={[styles.infoLabel, { marginTop: 12 }]}>
-                    Courriel
-                </Text>
-                <Text style={styles.infoValue}>
-                    {user.courriel ?? user.username}
-                </Text>
-
-                <Text style={[styles.infoLabel, { marginTop: 12 }]}>
-                    ID utilisateur
-                </Text>
-                <Text style={styles.infoValue}>
-                    {user.id_utilisateur ?? user.id}
-                </Text>
+            <View style={styles.tabsContainer}>
+                {renderTabButton("infos", "Infos")}
+                {isOwnProfile && renderTabButton("transactions", "Transactions")}
+                {isOwnProfile && renderTabButton("propositions", "Propositions")}
+                {renderTabButton("annonces", "Annonces")}
+                {renderTabButton("avis", "Avis")}
             </View>
 
-            {isOwnProfile && (
-                <>
-                    <Text style={styles.sectionTitle}>Transactions à évaluer</Text>
-                    {mesTransactionsAvis.length === 0 ? (
-                        <View style={styles.emptyBox}>
-                            <Text style={styles.emptyText}>
-                                Aucune transaction à évaluer pour l’instant.
-                            </Text>
-                        </View>
-                    ) : (
-                        <FlatList
-                            data={mesTransactionsAvis}
-                            keyExtractor={(item) => String(item.id_proposition)}
-                            renderItem={({ item }) => {
-                                const dateTexte = new Date(
-                                    item.date_proposition
-                                ).toLocaleDateString();
-                                const prixTexte = formatPrice(item.prix);
-                                const aDejaAvis = !!item.id_avis;
-
-                                return (
-                                    <View style={styles.propositionCard}>
-                                        <Text style={styles.propositionTitre}>
-                                            {item.titre_annonce}
-                                        </Text>
-                                        <Text style={styles.propositionLigne}>
-                                            Vendeur : {item.vendeur_prenom} {item.vendeur_nom}
-                                        </Text>
-                                        <Text style={styles.propositionLigne}>
-                                            Prix : {prixTexte} $
-                                        </Text>
-                                        <Text style={styles.propositionMeta}>
-                                            Acceptée le {dateTexte}
-                                        </Text>
-
-                                        <TouchableOpacity
-                                            style={styles.btnAvis}
-                                            onPress={() => openAvisModalFromTransaction(item)}
-                                        >
-                                            <Text style={styles.btnAvisText}>
-                                                {aDejaAvis ? "Modifier mon avis" : "Laisser un avis"}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                );
-                            }}
-                            scrollEnabled={false}
-                        />
-                    )}
-                </>
-            )}
+            {renderActiveTab()}
 
 
-            {isOwnProfile && (
-                <>
-                    <Text style={styles.sectionTitle}>Propositions reçues</Text>
-                    {mesPropositions.length === 0 ? (
-                        <View style={styles.emptyBox}>
-                            <Text style={styles.emptyText}>
-                                Aucune proposition pour l’instant.
-                            </Text>
-                        </View>
-                    ) : (
-                        <FlatList
-                            data={mesPropositions}
-                            keyExtractor={(item) => String(item.id_proposition)}
-                            renderItem={renderProposition}
-                            scrollEnabled={false}
-                        />
-                    )}
-                    <Text style={styles.sectionTitle}>Mes annonces</Text>
-                </>
-            )}
-            
-            {mesAnnonces.length === 0 ? (
-                <View style={styles.emptyBox}>
-                    <Text style={styles.emptyText}>Aucune annonce pour l’instant.</Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={mesAnnonces}
-                    keyExtractor={(item) => String(item.id_annonce)}
-                    renderItem={renderAnnonce}
-                    scrollEnabled={false}
-                />
-            )}
-
-            <Text style={styles.sectionTitle}>Avis</Text>
-            {mesAvis.length === 0 ? (
-                <View style={styles.emptyBox}>
-                    <Text style={styles.emptyText}>Aucun avis pour l’instant.</Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={mesAvis}
-                    keyExtractor={(item) => String(item.id_avis)}
-                    renderItem={renderAvis}
-                    scrollEnabled={false}
-                />
-            )}
 
 
 
@@ -691,14 +792,18 @@ export default function ProfilScreen({ navigation, route }) {
             </Modal>
 
             <Modal
-                visible={!!avisEnEdition}
+                visible={avisModalVisible}
                 transparent
                 animationType="slide"
-                onRequestClose={() => setAvisEnEdition(null)}
+                onRequestClose={closeAvisModal}
             >
                 <View style={styles.dialogOverlay}>
                     <View style={styles.dialogCard}>
-                        <Text style={styles.dialogTitle}>Modifier mon avis</Text>
+                        <Text style={styles.dialogTitle}>
+                            {editingAvis?.type === "edit"
+                                ? "Modifier mon avis"
+                                : "Laisser un avis"}
+                        </Text>
 
                         <Text style={styles.dialogLabel}>Note (1 à 5)</Text>
                         <TextInput
@@ -728,12 +833,13 @@ export default function ProfilScreen({ navigation, route }) {
 
                             <Button
                                 title="Annuler"
-                                onPress={() => setAvisEnEdition(null)}
+                                onPress={closeAvisModal}
                             />
                         </View>
                     </View>
                 </View>
             </Modal>
+
 
 
 
