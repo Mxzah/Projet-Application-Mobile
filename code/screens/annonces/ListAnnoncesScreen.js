@@ -135,7 +135,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     }
     
     try {
-      const ok = await marthaService.insertProposition(offerDate, offerPrice, offerPlace, currentUser?.id, selectedAnnonce.id_annonce, 1);
+      const ok = await marthaService.insertProposition(offerDate, parseFloat(offerPrice), offerPlace, currentUser?.id, selectedAnnonce.id_annonce, 1);
       if (ok) {
         setSuccessMessage('Votre offre a été soumise avec succès!');
         setTimeout(() => {
