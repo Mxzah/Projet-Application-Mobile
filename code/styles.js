@@ -1029,7 +1029,7 @@ export const getProfileStyles = (theme) =>
         backButtonText: {
             fontSize: 28,
             fontWeight: "bold",
-            color: theme.text, // ou blanc si thème sombre
+            color: theme.text,
         },
 
 
