@@ -1000,7 +1000,6 @@ export const getProfileStyles = (theme) =>
             color: theme.text,
 
         },
-
         tabButtonTextActive: {
             color: "#fff",
             fontWeight: "600",
