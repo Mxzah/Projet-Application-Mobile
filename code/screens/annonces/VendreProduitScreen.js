@@ -255,7 +255,7 @@ export default function VendreProduitScreen({ navigation, route }) {
 
   async function handleTakePhoto() {
     const result = await ImagePicker.launchCameraAsync({
-      quality: 0.0000001,
+      quality: 0.01,
       allowsEditing: true,
       base64: true,
       aspect: [4, 3],
@@ -266,8 +266,8 @@ export default function VendreProduitScreen({ navigation, route }) {
     const asset = result.assets?.[0];
     if (!asset) return;
 
-    // const base64Image = asset.base64 ?? '';
-    const base64Image = '';
+    const base64Image = asset.base64 ?? '';
+    //const base64Image = '';
     
     const MAX_BASE64_LENGTH = 300000;
     
