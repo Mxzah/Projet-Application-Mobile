@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert, ActivityIndicator } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/AuthContext";
 
 export default function LoginScreen({ navigation }) {
@@ -38,43 +39,45 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", padding: 20 }}>
-      <Text style={{ fontSize: 22, textAlign: "center", marginBottom: 20 }}>
-        Connexion
-      </Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, justifyContent: "center", padding: 20 }}>
+        <Text style={{ fontSize: 22, textAlign: "center", marginBottom: 20 }}>
+          Connexion
+        </Text>
 
-      <TextInput
-        placeholder="Courriel"
-        value={courriel}
-        onChangeText={setCourriel}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={inputStyle}
-      />
-
-      <TextInput
-        placeholder="Mot de passe"
-        value={motDePasse}
-        onChangeText={setMotDePasse}
-        secureTextEntry
-        style={inputStyle}
-      />
-
-      {loading ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <View style={{ marginBottom: 12 }}>
-          <Button title="Se connecter" onPress={handleLogin} />
-        </View>
-      )}
-
-      <View style={{ marginTop: 4 }}>
-        <Button
-          title="Créer un compte"
-          onPress={() => navigation.navigate("Inscription")}
+        <TextInput
+          placeholder="Courriel"
+          value={courriel}
+          onChangeText={setCourriel}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          style={inputStyle}
         />
+
+        <TextInput
+          placeholder="Mot de passe"
+          value={motDePasse}
+          onChangeText={setMotDePasse}
+          secureTextEntry
+          style={inputStyle}
+        />
+
+        {loading ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <View style={{ marginBottom: 12 }}>
+            <Button title="Se connecter" onPress={handleLogin} />
+          </View>
+        )}
+
+        <View style={{ marginTop: 4 }}>
+          <Button
+            title="Créer un compte"
+            onPress={() => navigation.navigate("Inscription")}
+          />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -9,6 +9,7 @@ import {
   insertAnnonce,
   deleteAnnonce,
   updateAnnonce,
+  markAnnonceAsSold,
 } from "./annonces";
 import {
   getPropositionsByUser,
@@ -31,6 +32,7 @@ export {
   insertAnnonce,
   deleteAnnonce,
   updateAnnonce,
+  markAnnonceAsSold,
   getPropositionsByUser,
   updatePropositionStatut,
   insertProposition,
@@ -52,6 +54,7 @@ const marthaService = {
   insertAnnonce,
   deleteAnnonce,
   updateAnnonce,
+  markAnnonceAsSold,
   getPropositionsByUser,
   updatePropositionStatut,
   insertProposition,

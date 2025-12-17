@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 
 export default function SignUpScreen({ navigation }) {
@@ -51,52 +52,54 @@ export default function SignUpScreen({ navigation }) {
 
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 22, marginBottom: 20, textAlign: 'center' }}>
-        Inscription
-      </Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+        <Text style={{ fontSize: 22, marginBottom: 20, textAlign: 'center' }}>
+          Inscription
+        </Text>
 
-      <TextInput
-        placeholder="Nom"
-        value={nom}
-        onChangeText={setNom}
-        style={inputStyle}
-      />
+        <TextInput
+          placeholder="Nom"
+          value={nom}
+          onChangeText={setNom}
+          style={inputStyle}
+        />
 
-      <TextInput
-        placeholder="Prénom"
-        value={prenom}
-        onChangeText={setPrenom}
-        style={inputStyle}
-      />
+        <TextInput
+          placeholder="Prénom"
+          value={prenom}
+          onChangeText={setPrenom}
+          style={inputStyle}
+        />
 
-      <TextInput
-        placeholder="Courriel"
-        value={courriel}
-        onChangeText={setCourriel}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={inputStyle}
-      />
+        <TextInput
+          placeholder="Courriel"
+          value={courriel}
+          onChangeText={setCourriel}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          style={inputStyle}
+        />
 
-      <TextInput
-        placeholder="Mot de passe"
-        secureTextEntry
-        value={motDePasse}
-        onChangeText={setMotDePasse}
-        style={inputStyle}
-      />
+        <TextInput
+          placeholder="Mot de passe"
+          secureTextEntry
+          value={motDePasse}
+          onChangeText={setMotDePasse}
+          style={inputStyle}
+        />
 
-      {isSubmitting ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <Button title="Créer un compte" onPress={handleSignUp} />
-      )}
+        {isSubmitting ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <Button title="Créer un compte" onPress={handleSignUp} />
+        )}
 
-      <View style={{ marginTop: 20 }}>
-        <Button title="Retour" onPress={() => navigation.goBack()} />
+        <View style={{ marginTop: 20 }}>
+          <Button title="Retour" onPress={() => navigation.goBack()} />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

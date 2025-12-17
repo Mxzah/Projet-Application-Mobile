@@ -45,49 +45,66 @@ export default function VendreProduitScreen({ navigation, route }) {
     setSuccessMessage('');
     setErrorMessage('');
 
+    const errors = [];
+
     if (!titre || titre.trim() === '') {
-      setErrorMessage('Veuillez entrer un titre pour votre annonce.');
-      return;
+      errors.push('• Veuillez entrer un titre pour votre annonce.');
     }
 
     if (!prix || prix.trim() === '' || isNaN(prix) || parseFloat(prix) <= 0) {
-      setErrorMessage('Veuillez entrer un prix valide (supérieur à 0).');
-      return;
+      errors.push('• Veuillez entrer un prix valide (supérieur à 0).');
     }
 
     if (!lieu || lieu.trim() === '') {
-      setErrorMessage('Veuillez entrer un lieu pour votre annonce.');
-      return;
+      errors.push('• Veuillez entrer un lieu pour votre annonce.');
     }
 
     if (!dateFin || dateFin.trim() === '') {
-      setErrorMessage('Veuillez entrer une date de fin pour votre annonce.');
-      return;
-    }
-
-    const dateRegex = /^\d{4}-\d{2}-\d{2}(\s+\d{2}:\d{2}:\d{2})?$/;
-    if (!dateRegex.test(dateFin)) {
-      setErrorMessage('Le format de la date doit être AAAA-MM-JJ ou AAAA-MM-JJ HH:MM:SS (ex: 2024-12-31 ou 2024-12-31 23:59:59).');
-      return;
+      errors.push('• Veuillez entrer une date de fin pour votre annonce.');
+    } else {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}(\s+\d{2}:\d{2}:\d{2})?$/;
+      if (!dateRegex.test(dateFin)) {
+        errors.push('• Le format de la date doit être AAAA-MM-JJ ou AAAA-MM-JJ HH:MM:SS.');
+      } else {
+        const dateFinPart = dateFin.trim().split(' ')[0];
+        const [year, month, day] = dateFinPart.split('-').map(Number);
+        const dateFinObj = new Date(year, month - 1, day);
+        
+        // Vérifier que la date existe (ex: 2025-02-30 n'existe pas)
+        if (dateFinObj.getFullYear() !== year || 
+            dateFinObj.getMonth() !== month - 1 || 
+            dateFinObj.getDate() !== day) {
+          errors.push('• La date entrée n\'existe pas (ex: le 30 février n\'existe pas).');
+        } else {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (dateFinObj < today) {
+            errors.push('• La date de fin doit être aujourd\'hui ou dans le futur.');
+          }
+        }
+      }
     }
 
     if (!coursSelection || coursSelection === '') {
-      setErrorMessage('Veuillez sélectionner un cours associé.');
-      return;
+      errors.push('• Veuillez sélectionner un cours associé.');
     }
 
     const userId = currentUser?.id ?? '';
     if (!userId) {
-      setErrorMessage('Vous devez être connecté pour mettre un produit en vente.');
+      errors.push('• Vous devez être connecté pour mettre un produit en vente.');
+    }
+
+    if (image && image.length > 300000) {
+      errors.push('• L\'image est trop grande. Veuillez reprendre une photo avec une qualité plus faible.');
+    }
+
+    if (errors.length > 0) {
+      setErrorMessage(errors.join('\n'));
       return;
     }
 
     setIdUtilisateur(userId);
-
-    if (image && image.length > 300000) {
-      setErrorMessage('L\'image est trop grande. Veuillez reprendre une photo avec une qualité plus faible.');
-      return;
-    }
 
     try {
       let ok;
@@ -160,6 +177,7 @@ export default function VendreProduitScreen({ navigation, route }) {
           lieu, 
           userId, 
           coursSelection, 
+          'Produit',
           titre,
           description || null,
           image || null
@@ -275,12 +293,7 @@ export default function VendreProduitScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <MarketplaceHeader
-        active="Vendre"
-        onPressVendre={() => {}}
-        onPressAcheter={() => navigation.navigate('ListAnnonces')}
-        onPressProgrammes={() => navigation.navigate('Programmes')}
-      />
+      <MarketplaceHeader active="Vendre" />
       <View style={{ flex: 1 }}>
         {successMessage ? (
           <View style={styles.successContainer}>

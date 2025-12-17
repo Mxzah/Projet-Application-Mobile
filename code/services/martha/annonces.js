@@ -59,6 +59,17 @@ export async function deleteAnnonce(id_annonce) {
   return response.success;
 }
 
+export async function markAnnonceAsSold(id_annonce) {
+  const response = await executeQuery("mark-annonce-sold/execute", { 
+    id_annonce: Number(id_annonce),
+    est_vendue: true 
+  });
+  if (!response.success) {
+    console.error("❌ markAnnonceAsSold erreur:", response);
+  }
+  return response.success;
+}
+
 export async function updateAnnonce(
   id_annonce,
   titre,

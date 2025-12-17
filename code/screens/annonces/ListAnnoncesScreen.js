@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { View, Text, Button, FlatList, Image, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, Text, Button, FlatList, Image, TouchableOpacity, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import MarketplaceHeader from '../../components/MarketplaceHeader';
 import marthaService from '../../services/Martha';
 import { geAnnoncestStyles } from '../../styles';
@@ -37,33 +38,55 @@ export default function ListAnnoncesScreen({ navigation, route }) {
   const [offerPlace, setOfferPlace] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [coursMap, setCoursMap] = useState({});
   const { theme } = useTheme();
   const { currentUser } = useAuth();
   const styles = geAnnoncestStyles(theme);
 
-  useEffect(() => {
-    let isMounted = true;
-    marthaService
-      .getAnnonces()
-      .then((data) => {
-        if (!isMounted) return;
-        const normalized = (data?.data ?? []).map((annonce) => ({
-          ...annonce,
-          image: resolveAnnonceImage(annonce.image_base64),
-        }));
-        setAnnonces(normalized);
-      })
-      .catch((error) => {
-        console.warn('Impossible de charger les annonces', error);
-        if (isMounted) {
-          setAnnonces([]);
-        }
-      });
+  // Recharger les annonces à chaque fois que l'écran devient visible
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+      
+      // Charger les annonces
+      marthaService
+        .getAnnonces()
+        .then((data) => {
+          if (!isMounted) return;
+          const normalized = (data?.data ?? []).map((annonce) => ({
+            ...annonce,
+            image: resolveAnnonceImage(annonce.image_base64),
+          }));
+          setAnnonces(normalized);
+        })
+        .catch((error) => {
+          console.warn('Impossible de charger les annonces', error);
+          if (isMounted) {
+            setAnnonces([]);
+          }
+        });
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+      // Charger les cours pour afficher leurs noms
+      marthaService
+        .getCours()
+        .then((response) => {
+          if (!isMounted) return;
+          const coursList = response?.data ?? [];
+          const map = {};
+          coursList.forEach(c => {
+            map[c.id_cours] = c.nom;
+          });
+          setCoursMap(map);
+        })
+        .catch((error) => {
+          console.warn('Impossible de charger les cours', error);
+        });
+
+      return () => {
+        isMounted = false;
+      };
+    }, [])
+  );
 
   useEffect(() => {
     const incoming = route?.params?.filteredCoursIds;
@@ -76,6 +99,12 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     const currentUserId = currentUser?.id;
     let filtered = annonces;
 
+    // Filtrer les annonces vendues (gérer les différents formats: boolean, number, string)
+    filtered = filtered.filter((annonce) => {
+      const estVendue = annonce.est_vendue;
+      return estVendue !== true && estVendue !== 1 && estVendue !== "1" && estVendue !== "true";
+    });
+
     if (currentUserId) {
       filtered = filtered.filter((annonce) => annonce.id_utilisateur !== currentUserId);
     }
@@ -85,11 +114,7 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     }
 
     return filtered;
-  }, [annonces, selectedCoursIds]);
-
-  const handleOpenProgrammes = () => {
-    navigation.navigate('Programmes', { selectedCoursIds });
-  };
+  }, [annonces, selectedCoursIds, currentUser?.id]);
 
   const handleClearFilters = () => {
     navigation.setParams?.({ filteredCoursIds: [] });
@@ -118,19 +143,43 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     setSuccessMessage('');
     setErrorMessage('');
 
+    const errors = [];
+
     if (offerPrice === '' || offerDate === '' || offerPlace === '') {
-      setErrorMessage('Veuillez remplir tous les champs.');
-      return;
+      errors.push('• Veuillez remplir tous les champs.');
     }
 
-    if (offerPrice <= 0 || isNaN(offerPrice)) {
-      setErrorMessage('Le prix de l\'offre doit être un nombre supérieur à 0.');
-      return;
+    if (offerPrice !== '' && (offerPrice <= 0 || isNaN(offerPrice))) {
+      errors.push('• Le prix de l\'offre doit être un nombre supérieur à 0.');
     }
 
-    const dateRegex = /^\d{4}-\d{2}-\d{2}(\s+\d{2}:\d{2}:\d{2})?$/;
-    if (!dateRegex.test(offerDate)) {
-      setErrorMessage('Le format de la date doit être AAAA-MM-JJ ou AAAA-MM-JJ HH:MM:SS (ex: 2024-12-31 ou 2024-12-31 23:59:59).');
+    if (offerDate !== '') {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}(\s+\d{2}:\d{2}:\d{2})?$/;
+      if (!dateRegex.test(offerDate)) {
+        errors.push('• Le format de la date doit être AAAA-MM-JJ ou AAAA-MM-JJ HH:MM:SS.');
+      } else {
+        const datePart = offerDate.trim().split(' ')[0];
+        const [year, month, day] = datePart.split('-').map(Number);
+        const dateObj = new Date(year, month - 1, day);
+        
+        // Vérifier que la date existe
+        if (dateObj.getFullYear() !== year || 
+            dateObj.getMonth() !== month - 1 || 
+            dateObj.getDate() !== day) {
+          errors.push('• La date entrée n\'existe pas (ex: le 30 février n\'existe pas).');
+        } else {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (dateObj < today) {
+            errors.push('• La date de la vente doit être aujourd\'hui ou dans le futur.');
+          }
+        }
+      }
+    }
+
+    if (errors.length > 0) {
+      setErrorMessage(errors.join('\n'));
       return;
     }
     
@@ -172,21 +221,26 @@ export default function ListAnnoncesScreen({ navigation, route }) {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <MarketplaceHeader
         active="Acheter"
-        onPressVendre={() => navigation.navigate('Vendre')}
-        onPressAcheter={() => {}}
-        onPressProgrammes={handleOpenProgrammes}
+        programmesParams={{ selectedCoursIds }}
       />
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Sélection du jour</Text>
+        <Text style={styles.sectionTitle}>Liste des annonces</Text>
       </View>
 
       {selectedCoursIds.length > 0 && (
         <View style={styles.filtersBanner}>
-          <Text style={styles.filtersText}>
-            {selectedCoursIds.length} cours sélectionné{selectedCoursIds.length > 1 ? 's' : ''}
-          </Text>
-          <Button title="Effacer" onPress={handleClearFilters} />
+          <View style={styles.filtersContent}>
+            <Text style={styles.filtersTitle}>
+              {selectedCoursIds.length} cours sélectionné{selectedCoursIds.length > 1 ? 's' : ''}
+            </Text>
+            <Text style={styles.filtersText} numberOfLines={2}>
+              {selectedCoursIds.map(id => coursMap[id] || `#${id}`).join(', ')}
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.filtersClearButton} onPress={handleClearFilters}>
+            <Text style={styles.filtersClearText}>✕</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -207,70 +261,100 @@ export default function ListAnnoncesScreen({ navigation, route }) {
       <Modal
         visible={!!selectedAnnonce}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={closeAnnonceDialog}
       >
-        <View style={styles.dialogOverlay}>
-          <View style={styles.dialogCard}>
+        <KeyboardAvoidingView 
+          style={styles.annonceModalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.annonceModalCard}>
             <TouchableOpacity
-              style={styles.dialogCloseButton}
+              style={styles.annonceModalCloseBtn}
               onPress={closeAnnonceDialog}
             >
-              <Text style={styles.dialogCloseButtonText}>×</Text>
+              <Text style={styles.annonceModalCloseBtnText}>×</Text>
             </TouchableOpacity>
             <ScrollView
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.dialogScrollContent}
+              contentContainerStyle={styles.annonceModalContent}
             >
               {selectedAnnonce && (
                 <>
-                  <Image source={selectedAnnonce.image} style={styles.dialogImage} resizeMode="cover" />
-                  <Text style={styles.dialogTitle}>{selectedAnnonce.titre}</Text>
-                  <Text style={styles.dialogDescription}>{selectedAnnonce.description}</Text>
-
-                  <View style={styles.dialogRow}>
-                    <Text style={styles.dialogLabel}>Prix demandé</Text>
-                    <Text style={styles.dialogValue}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
+                  <Image source={selectedAnnonce.image} style={styles.annonceModalImage} resizeMode="cover" />
+                  
+                  <View style={styles.annonceModalHeader}>
+                    <Text style={styles.annonceModalTitle}>{selectedAnnonce.titre}</Text>
+                    <View style={styles.annonceModalPriceBadge}>
+                      <Text style={styles.annonceModalPriceText}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
+                    </View>
                   </View>
-                  <View style={styles.dialogRow}>
-                    <Text style={styles.dialogLabel}>Lieu</Text>
-                    <Text style={styles.dialogValue}>{selectedAnnonce.lieu}</Text>
+
+                  {selectedAnnonce.description ? (
+                    <Text style={styles.annonceModalDescription}>{selectedAnnonce.description}</Text>
+                  ) : null}
+
+                  <View style={styles.annonceModalInfoSection}>
+                    <View style={styles.annonceModalInfoRow}>
+                      <Text style={styles.annonceModalInfoIcon}>📍</Text>
+                      <View>
+                        <Text style={styles.annonceModalInfoLabel}>Lieu de rencontre</Text>
+                        <Text style={styles.annonceModalInfoValue}>{selectedAnnonce.lieu}</Text>
+                      </View>
+                    </View>
                   </View>
 
                   {selectedAnnonce.id_utilisateur && (
                     <TouchableOpacity
-                      style={styles.profileLink}
+                      style={styles.annonceModalProfileBtn}
                       onPress={() => {
                         closeAnnonceDialog();
                         navigation.navigate('Profil', { id_utilisateur: selectedAnnonce.id_utilisateur });
                       }}
                     >
-                      <Text style={styles.profileLinkText}>Voir le profil du vendeur</Text>
+                      <Text style={styles.annonceModalProfileIcon}>👤</Text>
+                      <Text style={styles.annonceModalProfileText}>Voir le profil du vendeur</Text>
                     </TouchableOpacity>
                   )}
 
-                  <View style={styles.dialogForm}>
-                    <Text style={styles.dialogFormTitle}>Faire une offre</Text>
-                    <TextInput
-                      style={styles.dialogInput}
-                      placeholder="Montant de l'offre"
-                      keyboardType="numeric"
-                      value={offerPrice}
-                      onChangeText={setOfferPrice}
-                    />
-                    <TextInput
-                      style={styles.dialogInput}
-                      placeholder="Date de la vente (AAAA-MM-JJ)"
-                      placeholderTextColor="#888"
-                      value={offerDate}
-                      onChangeText={setOfferDate}
-                    />
-                    <TextInput
-                      style={styles.dialogInput}
-                      placeholder="Lieu de la vente"
-                      value={offerPlace}
-                      onChangeText={setOfferPlace}
-                    />
+                  <View style={styles.annonceModalDivider} />
+
+                  <View style={styles.annonceModalForm}>
+                    <Text style={styles.annonceModalFormTitle}>💰 Faire une offre</Text>
+                    
+                    <View style={styles.annonceModalInputGroup}>
+                      <Text style={styles.annonceModalInputLabel}>Montant proposé</Text>
+                      <TextInput
+                        style={styles.annonceModalInput}
+                        placeholder="Ex: 15.00"
+                        placeholderTextColor="#999"
+                        keyboardType="numeric"
+                        value={offerPrice}
+                        onChangeText={setOfferPrice}
+                      />
+                    </View>
+
+                    <View style={styles.annonceModalInputGroup}>
+                      <Text style={styles.annonceModalInputLabel}>Date de la vente</Text>
+                      <TextInput
+                        style={styles.annonceModalInput}
+                        placeholder="AAAA-MM-JJ"
+                        placeholderTextColor="#999"
+                        value={offerDate}
+                        onChangeText={setOfferDate}
+                      />
+                    </View>
+
+                    <View style={styles.annonceModalInputGroup}>
+                      <Text style={styles.annonceModalInputLabel}>Lieu de la vente</Text>
+                      <TextInput
+                        style={styles.annonceModalInput}
+                        placeholder="Ex: Cafétéria"
+                        placeholderTextColor="#999"
+                        value={offerPlace}
+                        onChangeText={setOfferPlace}
+                      />
+                    </View>
 
                     {successMessage ? (
                       <View style={styles.successContainer}>
@@ -284,16 +368,20 @@ export default function ListAnnoncesScreen({ navigation, route }) {
                       </View>
                     ) : null}
 
-                    <TouchableOpacity style={styles.offerButton} onPress={handleSubmitOffer}>
-                      <Text style={styles.offerButtonLabel}>FAIRE UNE OFFRE</Text>
-                    </TouchableOpacity>
-                    <Button title="Fermer" onPress={closeAnnonceDialog} />
+                    <View style={styles.annonceModalButtons}>
+                      <TouchableOpacity style={styles.annonceModalCancelBtn} onPress={closeAnnonceDialog}>
+                        <Text style={styles.annonceModalCancelBtnText}>Fermer</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.annonceModalSubmitBtn} onPress={handleSubmitOffer}>
+                        <Text style={styles.annonceModalSubmitBtnText}>Envoyer l'offre</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </>
               )}
             </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

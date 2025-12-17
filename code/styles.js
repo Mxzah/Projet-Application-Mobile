@@ -66,9 +66,33 @@ export const geAnnoncestStyles = (theme) =>
             alignItems: "center",
             justifyContent: "space-between",
         },
-        filtersText: {
-            fontWeight: "600",
+        filtersContent: {
+            flex: 1,
+            marginRight: 12,
+        },
+        filtersTitle: {
+            fontWeight: "700",
+            fontSize: 13,
             color: theme.text,
+            marginBottom: 2,
+        },
+        filtersText: {
+            fontSize: 12,
+            color: theme.primary,
+            fontWeight: "500",
+        },
+        filtersClearButton: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: theme.border,
+            alignItems: "center",
+            justifyContent: "center",
+        },
+        filtersClearText: {
+            fontSize: 16,
+            color: theme.text,
+            fontWeight: "600",
         },
         empty: {
             textAlign: "center",
@@ -160,6 +184,194 @@ export const geAnnoncestStyles = (theme) =>
             color: theme.submitButtonText,
             fontWeight: "700",
         },
+
+        // Styles pour le modal d'annonce amélioré
+        annonceModalOverlay: {
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 16,
+        },
+        annonceModalCard: {
+            backgroundColor: theme.card,
+            borderRadius: 24,
+            maxHeight: "90%",
+            width: "100%",
+            maxWidth: 500,
+            overflow: "hidden",
+            shadowColor: "#000",
+            shadowOpacity: 0.3,
+            shadowRadius: 20,
+            elevation: 15,
+        },
+        annonceModalCloseBtn: {
+            position: "absolute",
+            top: 12,
+            right: 12,
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+        },
+        annonceModalCloseBtnText: {
+            fontSize: 24,
+            color: "#fff",
+            fontWeight: "600",
+            lineHeight: 26,
+        },
+        annonceModalContent: {
+            paddingBottom: 20,
+        },
+        annonceModalImage: {
+            width: "100%",
+            height: 220,
+        },
+        annonceModalHeader: {
+            padding: 16,
+            paddingBottom: 8,
+        },
+        annonceModalTitle: {
+            fontSize: 22,
+            fontWeight: "700",
+            color: theme.text,
+            marginBottom: 8,
+        },
+        annonceModalPriceBadge: {
+            alignSelf: "flex-start",
+            backgroundColor: theme.primary,
+            paddingHorizontal: 14,
+            paddingVertical: 6,
+            borderRadius: 20,
+        },
+        annonceModalPriceText: {
+            fontSize: 18,
+            fontWeight: "700",
+            color: "#fff",
+        },
+        annonceModalDescription: {
+            paddingHorizontal: 16,
+            fontSize: 15,
+            lineHeight: 22,
+            color: theme.textLight,
+            marginBottom: 12,
+        },
+        annonceModalInfoSection: {
+            marginHorizontal: 16,
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            padding: 12,
+            marginBottom: 12,
+        },
+        annonceModalInfoRow: {
+            flexDirection: "row",
+            alignItems: "center",
+        },
+        annonceModalInfoIcon: {
+            fontSize: 20,
+            marginRight: 12,
+        },
+        annonceModalInfoLabel: {
+            fontSize: 12,
+            color: theme.textLight,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
+        },
+        annonceModalInfoValue: {
+            fontSize: 15,
+            fontWeight: "600",
+            color: theme.text,
+        },
+        annonceModalProfileBtn: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            marginHorizontal: 16,
+            paddingVertical: 12,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.primary,
+            marginBottom: 16,
+        },
+        annonceModalProfileIcon: {
+            fontSize: 16,
+            marginRight: 8,
+        },
+        annonceModalProfileText: {
+            fontSize: 14,
+            fontWeight: "600",
+            color: theme.primary,
+        },
+        annonceModalDivider: {
+            height: 1,
+            backgroundColor: theme.border,
+            marginHorizontal: 16,
+            marginBottom: 16,
+        },
+        annonceModalForm: {
+            paddingHorizontal: 16,
+        },
+        annonceModalFormTitle: {
+            fontSize: 18,
+            fontWeight: "700",
+            color: theme.text,
+            marginBottom: 16,
+        },
+        annonceModalInputGroup: {
+            marginBottom: 14,
+        },
+        annonceModalInputLabel: {
+            fontSize: 13,
+            fontWeight: "600",
+            color: theme.textLight,
+            marginBottom: 6,
+            textTransform: "uppercase",
+            letterSpacing: 0.3,
+        },
+        annonceModalInput: {
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: 12,
+            paddingHorizontal: 14,
+            paddingVertical: 12,
+            fontSize: 15,
+            color: theme.text,
+            backgroundColor: theme.background,
+        },
+        annonceModalButtons: {
+            flexDirection: "row",
+            gap: 12,
+            marginTop: 8,
+        },
+        annonceModalCancelBtn: {
+            flex: 1,
+            paddingVertical: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.border,
+            alignItems: "center",
+        },
+        annonceModalCancelBtnText: {
+            fontSize: 15,
+            fontWeight: "600",
+            color: theme.text,
+        },
+        annonceModalSubmitBtn: {
+            flex: 1,
+            paddingVertical: 14,
+            borderRadius: 12,
+            backgroundColor: theme.primary,
+            alignItems: "center",
+        },
+        annonceModalSubmitBtnText: {
+            fontSize: 15,
+            fontWeight: "700",
+            color: "#fff",
+        },
+
         sectionHeader: {
             paddingHorizontal: 12,
             paddingVertical: 8,
@@ -624,6 +836,78 @@ export const getProfileStyles = (theme) =>
             color: theme.text,
         },
 
+        annonceSectionHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 18,
+            paddingVertical: 14,
+            backgroundColor: theme.primary + '20',
+            marginHorizontal: 12,
+            marginTop: 16,
+            marginBottom: 8,
+            borderRadius: 12,
+            borderLeftWidth: 4,
+            borderLeftColor: theme.primary,
+        },
+
+        annonceSectionHeaderSold: {
+            backgroundColor: '#22c55e20',
+            borderLeftColor: '#22c55e',
+            marginTop: 24,
+        },
+
+        annonceSectionTitle: {
+            fontSize: 16,
+            fontWeight: '700',
+            color: theme.text,
+        },
+
+        annonceSectionCount: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.textLight,
+            backgroundColor: theme.background,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+            borderRadius: 12,
+        },
+
+        annonceGroupContainer: {
+            marginBottom: 16,
+        },
+
+        annonceGroupContainerSold: {
+            opacity: 0.7,
+        },
+
+        annonceGroupHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 18,
+            paddingVertical: 10,
+            backgroundColor: theme.primary + '15',
+            borderLeftWidth: 4,
+            borderLeftColor: theme.primary,
+            marginHorizontal: 12,
+            marginTop: 8,
+            borderRadius: 8,
+        },
+
+        annonceGroupTitle: {
+            fontSize: 14,
+            fontWeight: '700',
+            color: theme.primary,
+            flex: 1,
+        },
+
+        annonceGroupCount: {
+            fontSize: 12,
+            color: theme.textLight,
+            fontWeight: '500',
+        },
+
         annonceCard: {
             flexDirection: "column",
             backgroundColor: theme.card,
@@ -635,6 +919,28 @@ export const getProfileStyles = (theme) =>
             shadowOpacity: 0.06,
             shadowRadius: 6,
             elevation: 2,
+        },
+
+        annonceCardSold: {
+            opacity: 0.8,
+        },
+
+        soldBadge: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(34, 197, 94, 0.85)',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+
+        soldBadgeText: {
+            color: '#fff',
+            fontSize: 12,
+            fontWeight: '800',
+            letterSpacing: 1,
         },
 
         annonceImage: {
@@ -656,6 +962,13 @@ export const getProfileStyles = (theme) =>
             color: theme.text,
         },
 
+        annonceCours: {
+            fontSize: 12,
+            color: theme.primary,
+            marginTop: 2,
+            fontWeight: "600",
+        },
+
         annonceLieu: {
             fontSize: 13,
             color: theme.textLight,
@@ -667,6 +980,20 @@ export const getProfileStyles = (theme) =>
             fontWeight: "800",
             marginTop: 6,
             color: theme.text,
+        },
+
+        annonceImageSold: {
+            opacity: 0.5,
+        },
+
+        annonceTitreSold: {
+            textDecorationLine: 'line-through',
+            color: theme.textLight,
+        },
+
+        annoncePrixSold: {
+            textDecorationLine: 'line-through',
+            color: theme.textLight,
         },
 
         annonceDates: {
@@ -859,6 +1186,284 @@ export const getProfileStyles = (theme) =>
             color: "#fff",
             fontWeight: "700",
         },
+
+        // Styles pour le modal d'annonce amélioré (ProfilScreen)
+        annonceModalOverlay: {
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 16,
+        },
+        annonceModalCard: {
+            backgroundColor: theme.card,
+            borderRadius: 24,
+            maxHeight: "90%",
+            width: "100%",
+            maxWidth: 500,
+            overflow: "hidden",
+            shadowColor: "#000",
+            shadowOpacity: 0.3,
+            shadowRadius: 20,
+            elevation: 15,
+        },
+        annonceModalCloseBtn: {
+            position: "absolute",
+            top: 12,
+            right: 12,
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+        },
+        annonceModalCloseBtnText: {
+            fontSize: 24,
+            color: "#fff",
+            fontWeight: "600",
+            lineHeight: 26,
+        },
+        annonceModalContent: {
+            paddingBottom: 20,
+        },
+        annonceModalImage: {
+            width: "100%",
+            height: 220,
+        },
+        annonceModalHeader: {
+            padding: 16,
+            paddingBottom: 8,
+        },
+        annonceModalTitle: {
+            fontSize: 22,
+            fontWeight: "700",
+            color: theme.text,
+            marginBottom: 8,
+        },
+        annonceModalPriceBadge: {
+            alignSelf: "flex-start",
+            backgroundColor: theme.primary,
+            paddingHorizontal: 14,
+            paddingVertical: 6,
+            borderRadius: 20,
+        },
+        annonceModalPriceText: {
+            fontSize: 18,
+            fontWeight: "700",
+            color: "#fff",
+        },
+        annonceModalDescription: {
+            paddingHorizontal: 16,
+            fontSize: 15,
+            lineHeight: 22,
+            color: theme.textLight,
+            marginBottom: 12,
+        },
+        annonceModalInfoSection: {
+            marginHorizontal: 16,
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            padding: 12,
+            marginBottom: 12,
+        },
+        annonceModalInfoRow: {
+            flexDirection: "row",
+            alignItems: "center",
+        },
+        annonceModalInfoIcon: {
+            fontSize: 20,
+            marginRight: 12,
+        },
+        annonceModalInfoLabel: {
+            fontSize: 12,
+            color: theme.textLight,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
+        },
+        annonceModalInfoValue: {
+            fontSize: 15,
+            fontWeight: "600",
+            color: theme.text,
+        },
+        annonceModalDivider: {
+            height: 1,
+            backgroundColor: theme.border,
+            marginHorizontal: 16,
+            marginBottom: 16,
+        },
+        annonceModalForm: {
+            paddingHorizontal: 16,
+        },
+        annonceModalFormTitle: {
+            fontSize: 18,
+            fontWeight: "700",
+            color: theme.text,
+            marginBottom: 16,
+        },
+        annonceModalInputGroup: {
+            marginBottom: 14,
+        },
+        annonceModalInputLabel: {
+            fontSize: 13,
+            fontWeight: "600",
+            color: theme.textLight,
+            marginBottom: 6,
+            textTransform: "uppercase",
+            letterSpacing: 0.3,
+        },
+        annonceModalInput: {
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: 12,
+            paddingHorizontal: 14,
+            paddingVertical: 12,
+            fontSize: 15,
+            color: theme.text,
+            backgroundColor: theme.background,
+        },
+        annonceModalButtons: {
+            flexDirection: "row",
+            gap: 12,
+            marginTop: 8,
+        },
+        annonceModalCancelBtn: {
+            flex: 1,
+            paddingVertical: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.border,
+            alignItems: "center",
+        },
+        annonceModalCancelBtnText: {
+            fontSize: 15,
+            fontWeight: "600",
+            color: theme.text,
+        },
+        annonceModalSubmitBtn: {
+            flex: 1,
+            paddingVertical: 14,
+            borderRadius: 12,
+            backgroundColor: theme.primary,
+            alignItems: "center",
+        },
+        annonceModalSubmitBtnText: {
+            fontSize: 15,
+            fontWeight: "700",
+            color: "#fff",
+        },
+
+        // Styles pour le modal d'avis amélioré
+        avisModalOverlay: {
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+        },
+        avisModalCard: {
+            backgroundColor: theme.card,
+            borderRadius: 20,
+            padding: 24,
+            width: "100%",
+            maxWidth: 400,
+            shadowColor: "#000",
+            shadowOpacity: 0.25,
+            shadowRadius: 20,
+            elevation: 10,
+        },
+        avisModalCloseBtn: {
+            position: "absolute",
+            top: 12,
+            right: 12,
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: theme.border,
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1,
+        },
+        avisModalCloseBtnText: {
+            fontSize: 20,
+            color: theme.text,
+            fontWeight: "600",
+            lineHeight: 22,
+        },
+        avisModalTitle: {
+            fontSize: 22,
+            fontWeight: "700",
+            color: theme.text,
+            textAlign: "center",
+            marginBottom: 24,
+        },
+        avisModalLabel: {
+            fontSize: 14,
+            fontWeight: "600",
+            color: theme.textLight,
+            marginBottom: 8,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
+        },
+        avisStarsContainer: {
+            flexDirection: "row",
+            justifyContent: "center",
+            marginBottom: 20,
+            gap: 8,
+        },
+        avisStarButton: {
+            padding: 4,
+        },
+        avisStarIcon: {
+            fontSize: 36,
+            color: theme.border,
+        },
+        avisStarIconActive: {
+            color: "#FFD700",
+        },
+        avisModalTextarea: {
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: 12,
+            padding: 14,
+            fontSize: 15,
+            color: theme.text,
+            backgroundColor: theme.background,
+            minHeight: 100,
+            textAlignVertical: "top",
+            marginBottom: 20,
+        },
+        avisModalButtons: {
+            flexDirection: "row",
+            gap: 12,
+        },
+        avisModalCancelBtn: {
+            flex: 1,
+            paddingVertical: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.border,
+            alignItems: "center",
+        },
+        avisModalCancelBtnText: {
+            fontSize: 15,
+            fontWeight: "600",
+            color: theme.text,
+        },
+        avisModalSubmitBtn: {
+            flex: 1,
+            paddingVertical: 14,
+            borderRadius: 12,
+            backgroundColor: theme.primary,
+            alignItems: "center",
+        },
+        avisModalSubmitBtnText: {
+            fontSize: 15,
+            fontWeight: "600",
+            color: "#fff",
+        },
+
         logoutWrapper: {
             marginTop: 30,
             marginBottom: 40,

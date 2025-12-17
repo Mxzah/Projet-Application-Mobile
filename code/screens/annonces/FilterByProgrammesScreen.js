@@ -123,12 +123,7 @@ export default function FilterByProgrammesScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <MarketplaceHeader
-        active="Programmes"
-        onPressVendre={() => navigation.navigate('Vendre')}
-        onPressAcheter={() => navigation.navigate('ListAnnonces')}
-        onPressProgrammes={() => {}}
-      />
+      <MarketplaceHeader active="Programmes" />
       <View style={styles.listHeader}>
         <Text style={styles.title}>Programmes</Text>
       </View>
