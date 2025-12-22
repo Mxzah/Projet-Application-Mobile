@@ -1629,10 +1629,12 @@ export const getProfileStyles = (theme) =>
             paddingHorizontal: 16,
             borderRadius: 10,
             alignSelf: "flex-start",
-            backgroundColor: "#3590e5ff",
+            backgroundColor: theme.primaryLight,
+            borderWidth: 1,
+            borderColor: theme.primary,
         },
         btnEditAvisText: {
-            color: "#fff",
+            color: theme.primary,
             fontWeight: "700",
         },
         backButton: {
@@ -1664,7 +1666,7 @@ export const getProfileStyles = (theme) =>
         },
 
         btnDeleteAvisText: {
-            color: "#fff",
+            color: theme.buttonText,
             fontWeight: "700",
         },
 

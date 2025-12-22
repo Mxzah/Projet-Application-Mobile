@@ -7,16 +7,17 @@ import ListAnnoncesScreen from './screens/annonces/ListAnnoncesScreen';
 import VendreProduitScreen from './screens/annonces/VendreProduitScreen';
 import FilterByProgrammesScreen from './screens/annonces/FilterByProgrammesScreen';
 import ProfilScreen from './screens/profil/ProfilScreen';
-import { ThemeProvider } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
+import { ThemeProvider, useTheme } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
+import { View } from 'react-native';
 import { AuthProvider } from './context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+const ThemeWrapper = () => {
+  const { theme } = useTheme();
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <ThemeProvider>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      <SafeAreaProvider>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Connexion" screenOptions={{ headerShown: false }}>
             <Stack.Screen
@@ -45,8 +46,17 @@ export default function App() {
             />
           </Stack.Navigator>
         </NavigationContainer>
-        </ThemeProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+      </SafeAreaProvider>
+    </View>
+  );
+};
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <ThemeWrapper />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

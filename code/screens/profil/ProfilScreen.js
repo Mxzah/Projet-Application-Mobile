@@ -711,10 +711,10 @@ export default function ProfilScreen({ navigation, route }) {
                                             </Text>
 
                                             <TouchableOpacity
-                                                style={styles.btnAvis}
+                                                style={aDejaAvis ? styles.btnAvisInline : styles.btnAvis}
                                                 onPress={() => openAvisModalFromTransaction(item)}
                                             >
-                                                <Text style={styles.btnAvisText}>
+                                                <Text style={aDejaAvis ? styles.btnAvisInlineText : styles.btnAvisText}>
                                                     {aDejaAvis
                                                         ? "Modifier mon avis"
                                                         : "Laisser un avis"}
