@@ -923,6 +923,7 @@ export default function ProfilScreen({ navigation, route }) {
                     Le {dateTexte} • Statut : {item.statut_description}
                 </Text>
 
+
                 <View style={styles.propositionActions}>
                     <TouchableOpacity
                         style={styles.btnDelete}
