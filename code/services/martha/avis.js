@@ -33,3 +33,12 @@ export async function updateAvis({ id_avis, id_noteur, note, commentaire }) {
   }
   return response.success;
 }
+
+export async function deleteAvis(id_avis) {
+
+  const response = await executeQuery("delete-avis/execute", { id_avis });
+  if (!response.success) {
+    console.error("❌ deleteAvis erreur:", response);
+  }
+  return response.success;
+}

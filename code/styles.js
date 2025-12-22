@@ -1610,18 +1610,15 @@ export const getProfileStyles = (theme) =>
             fontWeight: "600",
         },
         btnEditAvis: {
-            backgroundColor: "#3b82f6",
-            marginTop: 8,
-            paddingVertical: 8,
+            paddingVertical: 10,
             paddingHorizontal: 16,
-            borderRadius: 6,
-            flex: 1,
-            alignItems: "center",
+            borderRadius: 10,
+            alignSelf: "flex-start",
+            backgroundColor: "#3590e5ff",
         },
         btnEditAvisText: {
             color: "#fff",
-            fontWeight: "600",
-            fontSize: 12,
+            fontWeight: "700",
         },
         backButton: {
             position: "absolute",
@@ -1637,6 +1634,24 @@ export const getProfileStyles = (theme) =>
             color: theme.text,
         },
 
+        avisActionsRow: {
+            flexDirection: "row",
+            gap: 10,
+            marginTop: 12,
+        },
+
+        btnDeleteAvis: {
+            paddingVertical: 10,
+            paddingHorizontal: 16,
+            borderRadius: 10,
+            alignSelf: "flex-start",
+            backgroundColor: "#E53935", // rouge
+        },
+
+        btnDeleteAvisText: {
+            color: "#fff",
+            fontWeight: "700",
+        },
 
 
     });

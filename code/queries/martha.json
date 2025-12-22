@@ -1,1 +1,117 @@
-[{"name":"insert-user","string":"INSERT INTO UTILISATEURS (nom, prenom, courriel, mot_de_passe)\r\nVALUES (\"?nom\", \"?prenom\", \"?courriel\", SHA2(\"?mot_de_passe\", 256));","type":1},{"name":"select-user-auth","string":"SELECT \r\n  id_utilisateur,\r\n  nom,\r\n  prenom,\r\n  courriel\r\nFROM UTILISATEURS\r\nWHERE courriel = \"?courriel\"\r\n  AND mot_de_passe = SHA2(\"?mot_de_passe\", 256);","type":0},{"name":"select-all-programmes","string":"SELECT \r\n    id_programme,\r\n    nom,\r\n    description,\r\n    nb_sessions\r\nFROM PROGRAMMES;","type":0},{"name":"select-programme-by-id","string":"SELECT \r\n    id_programme,\r\n    nom,\r\n    description,\r\n    nb_sessions\r\nFROM PROGRAMMES\r\nWHERE id_programme = ?;","type":0},{"name":"select-all-cours","string":"SELECT \r\n    id_cours,\r\n    code,\r\n    nom,\r\n    description,\r\n    id_programme\r\nFROM COURS;","type":0},{"name":"select-cours-by-id","string":"SELECT \r\n    id_cours,\r\n    code,\r\n    nom,\r\n    description,\r\n    id_programme\r\nFROM COURS\r\nWHERE id_cours = ?;","type":0},{"name":"select-avis-by-user","string":"SELECT \r\n  A.id_avis,\r\n  A.note,\r\n  A.commentaire,\r\n  A.date_avis,\r\n  A.id_utilisateur,\r\n  A.id_noteur,\r\n  A.id_proposition,\r\n  U.prenom AS noteur_prenom,\r\n  U.nom AS noteur_nom\r\nFROM AVIS A\r\nJOIN UTILISATEURS U \r\n  ON A.id_noteur = U.id_utilisateur\r\nWHERE A.id_utilisateur = ?id_utilisateur\r\nORDER BY A.date_avis DESC;","type":0},{"name":"select-all-annonces","string":"SELECT \r\n    id_annonce,\r\n    titre,\r\n    lieu,\r\n    description,\r\n    image_base64,\r\n    date_debut,\r\n    date_fin,\r\n    prix_demande,\r\n    id_cours,\r\n    id_utilisateur,\r\n\test_vendue\r\nFROM ANNONCES;","type":0},{"name":"select-annonce-by-id","string":"SELECT \r\n    id_annonce,\r\n    titre,\r\n    lieu,\r\n    description,\r\n    image_base64,\r\n    date_debut,\r\n    date_fin,\r\n    prix_demande,\r\n    id_cours,\r\n    id_utilisateur\r\nFROM ANNONCES\r\nWHERE id_annonce = ?;","type":0},{"name":"select-user-by-id","string":"SELECT id_utilisateur, nom, prenom, courriel\r\nFROM UTILISATEURS\r\nWHERE id_utilisateur = ?id_utilisateur;","type":0},{"name":"select-annonces-by-user","string":"SELECT \r\n    id_annonce,\r\n    titre,\r\n    description,\r\n    lieu,\r\n    date_debut,\r\n    date_fin,\r\n    prix_demande,\r\n    id_cours,\r\n    id_utilisateur,\r\n    image_base64,\r\n\test_vendue\r\nFROM ANNONCES\r\nWHERE id_utilisateur = ?id_utilisateur;","type":0},{"name":"select-propositions-by-user","string":"SELECT \r\n    p.id_proposition,\r\n    p.id_annonce,\r\n    p.id_statut,\r\n    p.prix,\r\n    p.lieu,\r\n    p.date_proposition,\r\n    p.id_utilisateur,\r\n    a.titre AS titre_annonce,\r\n    u.prenom AS acheteur_prenom,\r\n    u.nom AS acheteur_nom,\r\n    s.description AS statut_description\r\nFROM PROPOSITIONS p\r\nJOIN ANNONCES a ON p.id_annonce = a.id_annonce\r\nJOIN UTILISATEURS u ON p.id_utilisateur = u.id_utilisateur\r\nLEFT JOIN LOOKUP_STATUT s ON p.id_statut = s.id_statut\r\nWHERE a.id_utilisateur = \"?id_utilisateur\";","type":0},{"name":"update-proposition-statut","string":"UPDATE PROPOSITIONS\r\nSET id_statut = ?id_statut\r\nWHERE id_proposition = ?id_proposition;","type":0},{"name":"insert-proposition","string":"INSERT INTO PROPOSITIONS (date_proposition, prix, lieu, id_utilisateur, id_annonce, id_statut)\r\nVALUES (\"?date_proposition\", ?prix, \"?lieu\", ?id_utilisateur, ?id_annonce, ?id_statut);","type":1},{"name":"insert-annonce","string":"INSERT INTO ANNONCES (\r\n    titre,\r\n    lieu,\r\n    description,\r\n    image_base64,\r\n    date_debut,\r\n    date_fin,\r\n    prix_demande,\r\n    id_cours,\r\n    id_utilisateur\r\n)\r\nVALUES (\r\n    \"?titre\",\r\n    \"?lieu\",\r\n    \"?description\",\r\n    \"?image_base64\",\r\n    \"?date_debut\",\r\n    \"?date_fin\",\r\n    \"?prix_demande\",\r\n    \"?id_cours\",\r\n    \"?id_utilisateur\"\r\n);","type":1},{"name":"delete-annonce","string":"DELETE FROM ANNONCES\r\nWHERE id_annonce = \"?id_annonce\";","type":1},{"name":"update-annonce","string":"UPDATE ANNONCES\r\nSET\r\n    titre = \"?titre\",\r\n    lieu = \"?lieu\",\r\n    description = \"?description\",\r\n    image_base64 = \"?image_base64\",\r\n    date_debut = \"?date_debut\",\r\n    date_fin = \"?date_fin\",\r\n    prix_demande = ?prix_demande,\r\n    id_cours = ?id_cours,\r\n    id_utilisateur = ?id_utilisateur\r\nWHERE id_annonce = ?id_annonce;","type":1},{"name":"select-propositions-pour-avis","string":"SELECT\r\n    P.id_proposition,\r\n    P.date_proposition,\r\n    P.prix,\r\n    P.lieu,\r\n    P.id_annonce,\r\n    A.titre AS titre_annonce,\r\n    A.id_utilisateur AS id_vendeur,\r\n    V.prenom AS vendeur_prenom,\r\n    V.nom AS vendeur_nom,\r\n    S.id_statut,\r\n    S.description AS statut_description,\r\n    AV.id_avis,\r\n    AV.note,\r\n    AV.commentaire,\r\n    AV.date_avis\r\nFROM PROPOSITIONS P\r\nJOIN ANNONCES A\r\n    ON P.id_annonce = A.id_annonce\r\nJOIN UTILISATEURS V\r\n    ON A.id_utilisateur = V.id_utilisateur\r\nJOIN LOOKUP_STATUT S\r\n    ON P.id_statut = S.id_statut\r\nLEFT JOIN AVIS AV\r\n    ON AV.id_proposition = P.id_proposition\r\n   AND AV.id_noteur = P.id_utilisateur\r\nWHERE\r\n    P.id_utilisateur = ?id_utilisateur\r\n    AND P.id_statut = 2\r\nORDER BY P.date_proposition DESC;","type":0},{"name":"insert-avis-pour-proposition","string":"INSERT INTO AVIS (\r\n    note,\r\n    commentaire,\r\n    date_avis,\r\n    id_utilisateur,\r\n    id_noteur,\r\n    id_proposition\r\n)\r\nSELECT\r\n    \"?note\"              AS note,\r\n    \"?commentaire\"       AS commentaire,\r\n    NOW()                AS date_avis,\r\n    A.id_utilisateur     AS id_utilisateur,   \r\n    \"?id_noteur\"         AS id_noteur,       \r\n    \"?id_proposition\"    AS id_proposition\r\nFROM PROPOSITIONS P\r\nJOIN ANNONCES A\r\n    ON P.id_annonce = A.id_annonce\r\nWHERE\r\n    P.id_proposition = \"?id_proposition\"\r\n    AND P.id_utilisateur = \"?id_noteur\"\r\n    AND P.id_statut = 2\r\nLIMIT 1;","type":0},{"name":"update-avis","string":"UPDATE AVIS\r\nSET\r\n    note = ?note,\r\n    commentaire = \"?commentaire\",\r\n    date_avis = NOW()\r\nWHERE\r\n    id_avis = ?id_avis\r\n    AND id_noteur = ?id_noteur;","type":1},{"name":"mark-annonce-sold","string":"UPDATE ANNONCES \r\nSET est_vendue = ?est_vendue \r\nWHERE id_annonce = ?id_annonce;","type":1}]
+[
+    {
+        "name": "insert-user",
+        "string": "INSERT INTO UTILISATEURS (nom, prenom, courriel, mot_de_passe)\r\nVALUES (\"?nom\", \"?prenom\", \"?courriel\", SHA2(\"?mot_de_passe\", 256));",
+        "type": 1
+    },
+    {
+        "name": "select-user-auth",
+        "string": "SELECT \r\n  id_utilisateur,\r\n  nom,\r\n  prenom,\r\n  courriel\r\nFROM UTILISATEURS\r\nWHERE courriel = \"?courriel\"\r\n  AND mot_de_passe = SHA2(\"?mot_de_passe\", 256);",
+        "type": 0
+    },
+    {
+        "name": "select-all-programmes",
+        "string": "SELECT \r\n    id_programme,\r\n    nom,\r\n    description,\r\n    nb_sessions\r\nFROM PROGRAMMES;",
+        "type": 0
+    },
+    {
+        "name": "select-programme-by-id",
+        "string": "SELECT \r\n    id_programme,\r\n    nom,\r\n    description,\r\n    nb_sessions\r\nFROM PROGRAMMES\r\nWHERE id_programme = ?;",
+        "type": 0
+    },
+    {
+        "name": "select-all-cours",
+        "string": "SELECT \r\n    id_cours,\r\n    code,\r\n    nom,\r\n    description,\r\n    id_programme\r\nFROM COURS;",
+        "type": 0
+    },
+    {
+        "name": "select-cours-by-id",
+        "string": "SELECT \r\n    id_cours,\r\n    code,\r\n    nom,\r\n    description,\r\n    id_programme\r\nFROM COURS\r\nWHERE id_cours = ?;",
+        "type": 0
+    },
+    {
+        "name": "select-avis-by-user",
+        "string": "SELECT \r\n  A.id_avis,\r\n  A.note,\r\n  A.commentaire,\r\n  A.date_avis,\r\n  A.id_utilisateur,\r\n  A.id_noteur,\r\n  A.id_proposition,\r\n  U.prenom AS noteur_prenom,\r\n  U.nom AS noteur_nom\r\nFROM AVIS A\r\nJOIN UTILISATEURS U \r\n  ON A.id_noteur = U.id_utilisateur\r\nWHERE A.id_utilisateur = ?id_utilisateur\r\nORDER BY A.date_avis DESC;",
+        "type": 0
+    },
+    {
+        "name": "select-all-annonces",
+        "string": "SELECT \r\n    id_annonce,\r\n    titre,\r\n    lieu,\r\n    description,\r\n    image_base64,\r\n    date_debut,\r\n    date_fin,\r\n    prix_demande,\r\n    id_cours,\r\n    id_utilisateur,\r\n\test_vendue\r\nFROM ANNONCES;",
+        "type": 0
+    },
+    {
+        "name": "select-annonce-by-id",
+        "string": "SELECT \r\n    id_annonce,\r\n    titre,\r\n    lieu,\r\n    description,\r\n    image_base64,\r\n    date_debut,\r\n    date_fin,\r\n    prix_demande,\r\n    id_cours,\r\n    id_utilisateur\r\nFROM ANNONCES\r\nWHERE id_annonce = ?;",
+        "type": 0
+    },
+    {
+        "name": "select-user-by-id",
+        "string": "SELECT id_utilisateur, nom, prenom, courriel\r\nFROM UTILISATEURS\r\nWHERE id_utilisateur = ?id_utilisateur;",
+        "type": 0
+    },
+    {
+        "name": "select-annonces-by-user",
+        "string": "SELECT \r\n    id_annonce,\r\n    titre,\r\n    description,\r\n    lieu,\r\n    date_debut,\r\n    date_fin,\r\n    prix_demande,\r\n    id_cours,\r\n    id_utilisateur,\r\n    image_base64,\r\n\test_vendue\r\nFROM ANNONCES\r\nWHERE id_utilisateur = ?id_utilisateur;",
+        "type": 0
+    },
+    {
+        "name": "select-propositions-by-user",
+        "string": "SELECT \r\n    p.id_proposition,\r\n    p.id_annonce,\r\n    p.id_statut,\r\n    p.prix,\r\n    p.lieu,\r\n    p.date_proposition,\r\n    p.id_utilisateur,\r\n    a.titre AS titre_annonce,\r\n    u.prenom AS acheteur_prenom,\r\n    u.nom AS acheteur_nom,\r\n    s.description AS statut_description\r\nFROM PROPOSITIONS p\r\nJOIN ANNONCES a ON p.id_annonce = a.id_annonce\r\nJOIN UTILISATEURS u ON p.id_utilisateur = u.id_utilisateur\r\nLEFT JOIN LOOKUP_STATUT s ON p.id_statut = s.id_statut\r\nWHERE a.id_utilisateur = \"?id_utilisateur\";",
+        "type": 0
+    },
+    {
+        "name": "select-propositions-sent-by-user",
+        "string": "SELECT \r\n    p.id_proposition,\r\n    p.id_annonce,\r\n    p.id_statut,\r\n    p.prix,\r\n    p.lieu,\r\n    p.date_proposition,\r\n    p.id_utilisateur,\r\n    a.titre AS titre_annonce,\r\n    V.prenom AS vendeur_prenom,\r\n    V.nom AS vendeur_nom,\r\n    s.description AS statut_description\r\nFROM PROPOSITIONS p\r\nJOIN ANNONCES a ON p.id_annonce = a.id_annonce\r\nJOIN UTILISATEURS V ON a.id_utilisateur = V.id_utilisateur\r\nLEFT JOIN LOOKUP_STATUT s ON p.id_statut = s.id_statut\r\nWHERE p.id_utilisateur = \"?id_utilisateur\";",
+        "type": 0
+    },
+    {
+        "name": "delete-proposition",
+        "string": "DELETE FROM PROPOSITIONS\r\nWHERE id_proposition = \"?id_proposition\";",
+        "type": 1
+    },
+    {
+        "name": "update-proposition-statut",
+        "string": "UPDATE PROPOSITIONS\r\nSET id_statut = ?id_statut\r\nWHERE id_proposition = ?id_proposition;",
+        "type": 0
+    },
+    {
+        "name": "insert-proposition",
+        "string": "INSERT INTO PROPOSITIONS (date_proposition, prix, lieu, id_utilisateur, id_annonce, id_statut)\r\nVALUES (\"?date_proposition\", ?prix, \"?lieu\", ?id_utilisateur, ?id_annonce, ?id_statut);",
+        "type": 1
+    },
+    {
+        "name": "insert-annonce",
+        "string": "INSERT INTO ANNONCES (\r\n    titre,\r\n    lieu,\r\n    description,\r\n    image_base64,\r\n    date_debut,\r\n    date_fin,\r\n    prix_demande,\r\n    id_cours,\r\n    id_utilisateur\r\n)\r\nVALUES (\r\n    \"?titre\",\r\n    \"?lieu\",\r\n    \"?description\",\r\n    \"?image_base64\",\r\n    \"?date_debut\",\r\n    \"?date_fin\",\r\n    \"?prix_demande\",\r\n    \"?id_cours\",\r\n    \"?id_utilisateur\"\r\n);",
+        "type": 1
+    },
+    {
+        "name": "delete-annonce",
+        "string": "DELETE FROM ANNONCES\r\nWHERE id_annonce = \"?id_annonce\";",
+        "type": 1
+    },
+    {
+        "name": "update-annonce",
+        "string": "UPDATE ANNONCES\r\nSET\r\n    titre = \"?titre\",\r\n    lieu = \"?lieu\",\r\n    description = \"?description\",\r\n    image_base64 = \"?image_base64\",\r\n    date_debut = \"?date_debut\",\r\n    date_fin = \"?date_fin\",\r\n    prix_demande = ?prix_demande,\r\n    id_cours = ?id_cours,\r\n    id_utilisateur = ?id_utilisateur\r\nWHERE id_annonce = ?id_annonce;",
+        "type": 1
+    },
+    {
+        "name": "select-propositions-pour-avis",
+        "string": "SELECT\r\n    P.id_proposition,\r\n    P.date_proposition,\r\n    P.prix,\r\n    P.lieu,\r\n    P.id_annonce,\r\n    A.titre AS titre_annonce,\r\n    A.id_utilisateur AS id_vendeur,\r\n    V.prenom AS vendeur_prenom,\r\n    V.nom AS vendeur_nom,\r\n    S.id_statut,\r\n    S.description AS statut_description,\r\n    AV.id_avis,\r\n    AV.note,\r\n    AV.commentaire,\r\n    AV.date_avis\r\nFROM PROPOSITIONS P\r\nJOIN ANNONCES A\r\n    ON P.id_annonce = A.id_annonce\r\nJOIN UTILISATEURS V\r\n    ON A.id_utilisateur = V.id_utilisateur\r\nJOIN LOOKUP_STATUT S\r\n    ON P.id_statut = S.id_statut\r\nLEFT JOIN AVIS AV\r\n    ON AV.id_proposition = P.id_proposition\r\n   AND AV.id_noteur = P.id_utilisateur\r\nWHERE\r\n    P.id_utilisateur = ?id_utilisateur\r\n    AND P.id_statut = 2\r\nORDER BY P.date_proposition DESC;",
+        "type": 0
+    },
+    {
+        "name": "insert-avis-pour-proposition",
+        "string": "INSERT INTO AVIS (\r\n    note,\r\n    commentaire,\r\n    date_avis,\r\n    id_utilisateur,\r\n    id_noteur,\r\n    id_proposition\r\n)\r\nSELECT\r\n    \"?note\"              AS note,\r\n    \"?commentaire\"       AS commentaire,\r\n    NOW()                AS date_avis,\r\n    A.id_utilisateur     AS id_utilisateur,   \r\n    \"?id_noteur\"         AS id_noteur,       \r\n    \"?id_proposition\"    AS id_proposition\r\nFROM PROPOSITIONS P\r\nJOIN ANNONCES A\r\n    ON P.id_annonce = A.id_annonce\r\nWHERE\r\n    P.id_proposition = \"?id_proposition\"\r\n    AND P.id_utilisateur = \"?id_noteur\"\r\n    AND P.id_statut = 2\r\nLIMIT 1;",
+        "type": 0
+    },
+    {
+        "name": "update-avis",
+        "string": "UPDATE AVIS\r\nSET\r\n    note = ?note,\r\n    commentaire = \"?commentaire\",\r\n    date_avis = NOW()\r\nWHERE\r\n    id_avis = ?id_avis\r\n    AND id_noteur = ?id_noteur;",
+        "type": 1
+    },
+    {
+        "name": "mark-annonce-sold",
+        "string": "UPDATE ANNONCES \r\nSET est_vendue = ?est_vendue \r\nWHERE id_annonce = ?id_annonce;",
+        "type": 1
+    }
+]

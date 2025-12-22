@@ -1,4 +1,4 @@
-import { getAvisByUser, getTransactionsPourAvis, createAvis, updateAvis } from "./avis";
+import { getAvisByUser, getTransactionsPourAvis, createAvis, updateAvis, deleteAvis } from "./avis";
 import { getUserById } from "./users";
 import { getProgrammes } from "./programmes";
 import { getCours } from "./cours";
@@ -13,6 +13,8 @@ import {
 } from "./annonces";
 import {
   getPropositionsByUser,
+  getPropositionsSentByUser,
+  deleteProposition,
   updatePropositionStatut,
   insertProposition,
 } from "./propositions";
@@ -23,6 +25,7 @@ export {
   getTransactionsPourAvis,
   createAvis,
   updateAvis,
+  deleteAvis,
   getUserById,
   getProgrammes,
   getCours,
@@ -34,6 +37,8 @@ export {
   updateAnnonce,
   markAnnonceAsSold,
   getPropositionsByUser,
+  getPropositionsSentByUser,
+  deleteProposition,
   updatePropositionStatut,
   insertProposition,
   signUp,
@@ -45,6 +50,7 @@ const marthaService = {
   getTransactionsPourAvis,
   createAvis,
   updateAvis,
+  deleteAvis,
   getUserById,
   getProgrammes,
   getCours,
@@ -56,6 +62,8 @@ const marthaService = {
   updateAnnonce,
   markAnnonceAsSold,
   getPropositionsByUser,
+  getPropositionsSentByUser,
+  deleteProposition,
   updatePropositionStatut,
   insertProposition,
   signUp,

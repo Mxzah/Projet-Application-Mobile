@@ -56,6 +56,7 @@ export default function ProfilScreen({ navigation, route }) {
     const [offerSuccessMessage, setOfferSuccessMessage] = useState('');
     const [offerErrorMessage, setOfferErrorMessage] = useState('');
     const [mesPropositions, setMesPropositions] = useState([]);
+    const [mesPropositionsEnvoyees, setMesPropositionsEnvoyees] = useState([]);
 
     const [mesTransactionsAvis, setMesTransactionsAvis] = useState([]); // propositions acceptées où je peux laisser un avis
     const [avisModalVisible, setAvisModalVisible] = useState(false);
@@ -64,6 +65,7 @@ export default function ProfilScreen({ navigation, route }) {
     const [avisCommentaire, setAvisCommentaire] = useState("");
     const [activeTab, setActiveTab] = useState("infos");
     const [coursMap, setCoursMap] = useState({});
+
 
 
 
@@ -122,9 +124,14 @@ export default function ProfilScreen({ navigation, route }) {
                     setMesPropositions(
                         (propositions ?? []).map(Proposition.fromApi)
                     );
+
+                    // Propositions envoyées (où je suis l'acheteur)
+                    const sent = await marthaService.getPropositionsSentByUser(currentUser.id);
+                    setMesPropositionsEnvoyees((sent ?? []).map(Proposition.fromApi));
                 } else {
                     setMesTransactionsAvis([]);
                     setMesPropositions([]);
+                    setMesPropositionsEnvoyees([]);
                 }
             }
 
@@ -156,7 +163,7 @@ export default function ProfilScreen({ navigation, route }) {
 
             // Convertir en tableau
             const result = [];
-            
+
             const coursKeys = Object.keys(groups)
                 .filter(k => k !== sansCoursKey)
                 .sort((a, b) => {
@@ -242,9 +249,9 @@ export default function ProfilScreen({ navigation, route }) {
 
             // Refuser toutes les autres propositions en attente pour cette annonce
             const autresPropositions = mesPropositions.filter(
-                (p) => p.id_annonce === id_annonce && 
-                       p.id_proposition !== id_proposition && 
-                       p.id_statut === 1 // en attente
+                (p) => p.id_annonce === id_annonce &&
+                    p.id_proposition !== id_proposition &&
+                    p.id_statut === 1 // en attente
             );
 
             // Mettre à jour chaque proposition sur le backend
@@ -286,7 +293,37 @@ export default function ProfilScreen({ navigation, route }) {
         }
     };
 
+    const handleDeleteAvis = (avis) => {
 
+        Alert.alert(
+            "Supprimer l'avis",
+            "Êtes-vous sûr de vouloir supprimer cet avis ?",
+            [
+                { text: "Annuler", style: "cancel" },
+                {
+                    text: "Supprimer",
+                    style: "destructive",
+                    onPress: async () => {
+                        const ok = await marthaService.deleteAvis(avis.id_avis);
+
+                        if (!ok) {
+                            Alert.alert("Erreur", "Impossible de supprimer l'avis.");
+                            return;
+                        }
+
+                        setMesAvis((prev) => prev.filter(a => a.id_avis !== avis.id_avis));
+
+                        // IMPORTANT: si tu as l'onglet "Transactions à évaluer"
+                        // il faut recharger pour que la transaction redevienne "à évaluer" (sans avis)
+                        if (currentUser?.id) {
+                            const tx = await marthaService.getTransactionsPourAvis(currentUser.id);
+                            setMesTransactionsAvis(tx);
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
 
     const handleDeleteAnnonce = async (id_annonce) => {
@@ -342,7 +379,7 @@ export default function ProfilScreen({ navigation, route }) {
 
     const handleSubmitOffer = async () => {
         if (!selectedAnnonce) return;
-        
+
         setOfferSuccessMessage('');
         setOfferErrorMessage('');
 
@@ -364,16 +401,16 @@ export default function ProfilScreen({ navigation, route }) {
                 const datePart = offerDate.trim().split(' ')[0];
                 const [year, month, day] = datePart.split('-').map(Number);
                 const dateObj = new Date(year, month - 1, day);
-                
+
                 // Vérifier que la date existe
-                if (dateObj.getFullYear() !== year || 
-                    dateObj.getMonth() !== month - 1 || 
+                if (dateObj.getFullYear() !== year ||
+                    dateObj.getMonth() !== month - 1 ||
                     dateObj.getDate() !== day) {
                     errors.push('• La date entrée n\'existe pas (ex: le 30 février n\'existe pas).');
                 } else {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
-                    
+
                     if (dateObj < today) {
                         errors.push('• La date de la vente doit être aujourd\'hui ou dans le futur.');
                     }
@@ -385,14 +422,14 @@ export default function ProfilScreen({ navigation, route }) {
             setOfferErrorMessage(errors.join('\n'));
             return;
         }
-        
+
         try {
             const ok = await marthaService.insertProposition(
-                offerDate, 
-                parseFloat(offerPrice), 
-                offerPlace, 
-                currentUser?.id, 
-                selectedAnnonce.id_annonce, 
+                offerDate,
+                parseFloat(offerPrice),
+                offerPlace,
+                currentUser?.id,
+                selectedAnnonce.id_annonce,
                 1
             );
             if (ok) {
@@ -578,6 +615,26 @@ export default function ProfilScreen({ navigation, route }) {
         );
     };
 
+    const handleDeleteSentProposition = (id_proposition) => {
+        Alert.alert("Confirmer", "Supprimer cette proposition ?", [
+            { text: "Annuler", style: "cancel" },
+            {
+                text: "Supprimer",
+                style: "destructive",
+                onPress: async () => {
+                    const ok = await marthaService.deleteProposition(id_proposition);
+                    if (ok) {
+                        setMesPropositionsEnvoyees(prev => prev.filter(p => p.id_proposition !== id_proposition));
+                    } else {
+                        Alert.alert("Erreur", "Impossible de supprimer la proposition.");
+                    }
+                },
+            },
+        ]);
+    };
+
+
+
     const renderActiveTab = () => {
         switch (activeTab) {
             case "infos":
@@ -679,13 +736,29 @@ export default function ProfilScreen({ navigation, route }) {
                                 scrollEnabled={false}
                             />
                         )}
+
+                        <Text style={[styles.sectionTitle, { marginTop: 12 }]}>Propositions envoyées</Text>
+                        {mesPropositionsEnvoyees.length === 0 ? (
+                            <View style={styles.emptyBox}>
+                                <Text style={styles.emptyText}>
+                                    Aucune proposition envoyée pour l’instant.
+                                </Text>
+                            </View>
+                        ) : (
+                            <FlatList
+                                data={mesPropositionsEnvoyees}
+                                keyExtractor={(item) => String(item.id_proposition)}
+                                renderItem={renderSentProposition}
+                                scrollEnabled={false}
+                            />
+                        )}
                     </>
                 );
 
             case "annonces":
                 const totalActives = annoncesActives.reduce((acc, g) => acc + g.annonces.length, 0);
                 const totalVendues = annoncesVendues.reduce((acc, g) => acc + g.annonces.length, 0);
-                
+
                 return (
                     <>
                         {/* Section Annonces Actives */}
@@ -693,7 +766,7 @@ export default function ProfilScreen({ navigation, route }) {
                             <Text style={styles.annonceSectionTitle}>📢 Annonces actives</Text>
                             <Text style={styles.annonceSectionCount}>{totalActives}</Text>
                         </View>
-                        
+
                         {totalActives === 0 ? (
                             <View style={styles.emptyBox}>
                                 <Text style={styles.emptyText}>
@@ -723,7 +796,7 @@ export default function ProfilScreen({ navigation, route }) {
                             <Text style={styles.annonceSectionTitle}>✅ Annonces vendues</Text>
                             <Text style={styles.annonceSectionCount}>{totalVendues}</Text>
                         </View>
-                        
+
                         {totalVendues === 0 ? (
                             <View style={styles.emptyBox}>
                                 <Text style={styles.emptyText}>
@@ -803,19 +876,64 @@ export default function ProfilScreen({ navigation, route }) {
                 </TouchableOpacity>
 
                 {estMonAvis && (
-                    <TouchableOpacity
-                        style={styles.btnEditAvis}
-                        onPress={() => openAvisModalFromAvis(item)}
-                    >
-                        <Text style={styles.btnEditAvisText}>Modifier</Text>
-                    </TouchableOpacity>
-                )}
+                    <View style={styles.avisActionsRow}>
+                        <TouchableOpacity
+                            style={styles.btnEditAvis}
+                            onPress={() => openAvisModalFromAvis(item)}
+                        >
+                            <Text style={styles.btnEditAvisText}>Modifier</Text>
+                        </TouchableOpacity>
 
-            </View>
+                        <TouchableOpacity
+                            style={styles.btnDeleteAvis}
+                            onPress={() => handleDeleteAvis(item)}>
+
+                            <Text style={styles.btnDeleteAvisText}>Supprimer</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                )
+                }
+
+
+            </View >
         );
     };
 
+    const renderSentProposition = ({ item }) => {
+        const dateTexte = item.formattedDate;
+        const prixTexte = `${item.formattedPrice} $`;
+        const enAttente = item.isPending;
 
+        return (
+            <View style={styles.propositionCard}>
+                <Text style={styles.propositionTitre}>
+                    Proposition sur : {item.titre_annonce}
+                </Text>
+
+                <Text style={styles.propositionLigne}>
+                    Prix proposé : {prixTexte}
+                </Text>
+
+                <Text style={styles.propositionLigne}>
+                    Lieu proposé : {item.lieu || "Non précisé"}
+                </Text>
+
+                <Text style={styles.propositionMeta}>
+                    Le {dateTexte} • Statut : {item.statut_description}
+                </Text>
+
+                <View style={styles.propositionActions}>
+                    <TouchableOpacity
+                        style={styles.btnDelete}
+                        onPress={() => handleDeleteSentProposition(item.id_proposition)}
+                    >
+                        <Text style={styles.btnDeleteText}>Supprimer</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    }
 
 
     const renderAnnonce = ({ item, isSold = false }) => {
@@ -911,264 +1029,264 @@ export default function ProfilScreen({ navigation, route }) {
                 contentContainerStyle={styles.scrollContent}
             >
                 <View style={styles.header}>
-                {!isOwnProfile && (
+                    {!isOwnProfile && (
+                        <TouchableOpacity
+                            style={styles.backButton}
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Text style={styles.backButtonText}>←</Text>
+                        </TouchableOpacity>
+                    )}
                     <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => navigation.goBack()}
+                        onPress={toggleTheme}
+                        style={styles.themeToggleButton}
                     >
-                        <Text style={styles.backButtonText}>←</Text>
-                    </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                    onPress={toggleTheme}
-                    style={styles.themeToggleButton}
-                >
-                    <Text style={styles.themeToggleText}>
-                        {isDark ? "☀ Mode clair" : "🌙 Mode sombre"}
-                    </Text>
-                </TouchableOpacity>
-
-                <Image
-                    source={{
-                        uri: "https://cdn-icons-png.flaticon.com/512/219/219970.png",
-                    }}
-                    style={styles.avatar}
-                />
-                <Text style={styles.name}>
-                    {user.prenom} {user.nom}
-                </Text>
-                <Text style={styles.email}>
-                    {user.courriel ?? user.username}
-                </Text>
-
-                <TouchableOpacity
-                    style={styles.btnAnnonces}
-                    onPress={() => navigation.navigate("ListAnnonces")}
-                >
-                    <Text style={styles.btnAnnoncesText}>Voir les annonces</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.tabsContainer}>
-                {renderTabButton("infos", "Infos")}
-                {isOwnProfile && renderTabButton("transactions", "Transactions")}
-                {isOwnProfile && renderTabButton("propositions", "Propositions")}
-                {renderTabButton("annonces", "Annonces")}
-                {renderTabButton("avis", "Avis")}
-            </View>
-
-            {renderActiveTab()}
-
-
-
-
-
-            <Modal
-                visible={!!selectedAnnonce}
-                transparent
-                animationType="fade"
-                onRequestClose={closeAnnonceDialog}
-            >
-                <KeyboardAvoidingView 
-                    style={styles.annonceModalOverlay}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                >
-                    <View style={styles.annonceModalCard}>
-                        <TouchableOpacity
-                            style={styles.annonceModalCloseBtn}
-                            onPress={closeAnnonceDialog}
-                        >
-                            <Text style={styles.annonceModalCloseBtnText}>×</Text>
-                        </TouchableOpacity>
-                        <ScrollView
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={styles.annonceModalContent}
-                        >
-                            {selectedAnnonce && (
-                                <>
-                                    <Image
-                                        source={resolveAnnonceImage(selectedAnnonce.image_base64)}
-                                        style={styles.annonceModalImage}
-                                        resizeMode="cover"
-                                    />
-                                    
-                                    <View style={styles.annonceModalHeader}>
-                                        <Text style={styles.annonceModalTitle}>{selectedAnnonce.titre}</Text>
-                                        <View style={styles.annonceModalPriceBadge}>
-                                            <Text style={styles.annonceModalPriceText}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
-                                        </View>
-                                    </View>
-
-                                    {selectedAnnonce.description ? (
-                                        <Text style={styles.annonceModalDescription}>{selectedAnnonce.description}</Text>
-                                    ) : null}
-
-                                    <View style={styles.annonceModalInfoSection}>
-                                        <View style={styles.annonceModalInfoRow}>
-                                            <Text style={styles.annonceModalInfoIcon}>📍</Text>
-                                            <View>
-                                                <Text style={styles.annonceModalInfoLabel}>Lieu de rencontre</Text>
-                                                <Text style={styles.annonceModalInfoValue}>{selectedAnnonce.lieu}</Text>
-                                            </View>
-                                        </View>
-                                    </View>
-
-                                    <View style={styles.annonceModalDivider} />
-
-                                    <View style={styles.annonceModalForm}>
-                                        <Text style={styles.annonceModalFormTitle}>💰 Faire une offre</Text>
-                                        
-                                        <View style={styles.annonceModalInputGroup}>
-                                            <Text style={styles.annonceModalInputLabel}>Montant proposé</Text>
-                                            <TextInput
-                                                style={styles.annonceModalInput}
-                                                placeholder="Ex: 15.00"
-                                                placeholderTextColor="#999"
-                                                keyboardType="numeric"
-                                                value={offerPrice}
-                                                onChangeText={setOfferPrice}
-                                            />
-                                        </View>
-
-                                        <View style={styles.annonceModalInputGroup}>
-                                            <Text style={styles.annonceModalInputLabel}>Date de la vente</Text>
-                                            <TextInput
-                                                style={styles.annonceModalInput}
-                                                placeholder="AAAA-MM-JJ"
-                                                placeholderTextColor="#999"
-                                                value={offerDate}
-                                                onChangeText={setOfferDate}
-                                            />
-                                        </View>
-
-                                        <View style={styles.annonceModalInputGroup}>
-                                            <Text style={styles.annonceModalInputLabel}>Lieu de la vente</Text>
-                                            <TextInput
-                                                style={styles.annonceModalInput}
-                                                placeholder="Ex: Cafétéria"
-                                                placeholderTextColor="#999"
-                                                value={offerPlace}
-                                                onChangeText={setOfferPlace}
-                                            />
-                                        </View>
-
-                                        {offerSuccessMessage ? (
-                                            <View style={styles.successContainer}>
-                                                <Text style={styles.successText}>{offerSuccessMessage}</Text>
-                                            </View>
-                                        ) : null}
-
-                                        {offerErrorMessage ? (
-                                            <View style={styles.errorContainer}>
-                                                <Text style={styles.errorText}>{offerErrorMessage}</Text>
-                                            </View>
-                                        ) : null}
-
-                                        <View style={styles.annonceModalButtons}>
-                                            <TouchableOpacity style={styles.annonceModalCancelBtn} onPress={closeAnnonceDialog}>
-                                                <Text style={styles.annonceModalCancelBtnText}>Fermer</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity style={styles.annonceModalSubmitBtn} onPress={handleSubmitOffer}>
-                                                <Text style={styles.annonceModalSubmitBtnText}>Envoyer l'offre</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                </>
-                            )}
-                        </ScrollView>
-                    </View>
-                </KeyboardAvoidingView>
-            </Modal>
-
-            <Modal
-                visible={avisModalVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={closeAvisModal}
-            >
-                <KeyboardAvoidingView 
-                    style={styles.avisModalOverlay}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                >
-                    <View style={styles.avisModalCard}>
-                        <TouchableOpacity
-                            style={styles.avisModalCloseBtn}
-                            onPress={closeAvisModal}
-                        >
-                            <Text style={styles.avisModalCloseBtnText}>×</Text>
-                        </TouchableOpacity>
-
-                        <Text style={styles.avisModalTitle}>
-                            {editingAvis?.type === "edit"
-                                ? "✏️ Modifier mon avis"
-                                : "⭐ Laisser un avis"}
+                        <Text style={styles.themeToggleText}>
+                            {isDark ? "☀ Mode clair" : "🌙 Mode sombre"}
                         </Text>
+                    </TouchableOpacity>
 
-                        <Text style={styles.avisModalLabel}>Note</Text>
-                        <View style={styles.avisStarsContainer}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <TouchableOpacity
-                                    key={star}
-                                    onPress={() => setAvisNote(String(star))}
-                                    style={styles.avisStarButton}
-                                >
-                                    <Text style={[
-                                        styles.avisStarIcon,
-                                        parseInt(avisNote) >= star && styles.avisStarIconActive
-                                    ]}>
-                                        ★
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        <Text style={styles.avisModalLabel}>Commentaire</Text>
-                        <TextInput
-                            style={styles.avisModalTextarea}
-                            multiline
-                            numberOfLines={4}
-                            placeholder="Partagez votre expérience..."
-                            placeholderTextColor={theme.textLight}
-                            value={avisCommentaire}
-                            onChangeText={setAvisCommentaire}
-                        />
-
-                        <View style={styles.avisModalButtons}>
-                            <TouchableOpacity
-                                style={styles.avisModalCancelBtn}
-                                onPress={closeAvisModal}
-                            >
-                                <Text style={styles.avisModalCancelBtnText}>Annuler</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.avisModalSubmitBtn}
-                                onPress={handleSaveAvis}
-                            >
-                                <Text style={styles.avisModalSubmitBtnText}>Enregistrer</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </KeyboardAvoidingView>
-            </Modal>
-
-
-
-
-            {isOwnProfile && (
-                <View style={styles.logoutWrapper}>
-                    <TouchableOpacity
-                        style={styles.logoutButton}
-                        onPress={() => {
-                            logOut();
-                            navigation.replace("Connexion");
+                    <Image
+                        source={{
+                            uri: "https://cdn-icons-png.flaticon.com/512/219/219970.png",
                         }}
+                        style={styles.avatar}
+                    />
+                    <Text style={styles.name}>
+                        {user.prenom} {user.nom}
+                    </Text>
+                    <Text style={styles.email}>
+                        {user.courriel ?? user.username}
+                    </Text>
 
+                    <TouchableOpacity
+                        style={styles.btnAnnonces}
+                        onPress={() => navigation.navigate("ListAnnonces")}
                     >
-                        <Text style={styles.btnAnnoncesText}>Se déconnecter</Text>
+                        <Text style={styles.btnAnnoncesText}>Voir les annonces</Text>
                     </TouchableOpacity>
                 </View>
-            )}
+
+                <View style={styles.tabsContainer}>
+                    {renderTabButton("infos", "Infos")}
+                    {isOwnProfile && renderTabButton("transactions", "Transactions")}
+                    {isOwnProfile && renderTabButton("propositions", "Propositions")}
+                    {renderTabButton("annonces", "Annonces")}
+                    {renderTabButton("avis", "Avis")}
+                </View>
+
+                {renderActiveTab()}
+
+
+
+
+
+                <Modal
+                    visible={!!selectedAnnonce}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={closeAnnonceDialog}
+                >
+                    <KeyboardAvoidingView
+                        style={styles.annonceModalOverlay}
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    >
+                        <View style={styles.annonceModalCard}>
+                            <TouchableOpacity
+                                style={styles.annonceModalCloseBtn}
+                                onPress={closeAnnonceDialog}
+                            >
+                                <Text style={styles.annonceModalCloseBtnText}>×</Text>
+                            </TouchableOpacity>
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={styles.annonceModalContent}
+                            >
+                                {selectedAnnonce && (
+                                    <>
+                                        <Image
+                                            source={resolveAnnonceImage(selectedAnnonce.image_base64)}
+                                            style={styles.annonceModalImage}
+                                            resizeMode="cover"
+                                        />
+
+                                        <View style={styles.annonceModalHeader}>
+                                            <Text style={styles.annonceModalTitle}>{selectedAnnonce.titre}</Text>
+                                            <View style={styles.annonceModalPriceBadge}>
+                                                <Text style={styles.annonceModalPriceText}>{formatPrice(selectedAnnonce.prix_demande)} $</Text>
+                                            </View>
+                                        </View>
+
+                                        {selectedAnnonce.description ? (
+                                            <Text style={styles.annonceModalDescription}>{selectedAnnonce.description}</Text>
+                                        ) : null}
+
+                                        <View style={styles.annonceModalInfoSection}>
+                                            <View style={styles.annonceModalInfoRow}>
+                                                <Text style={styles.annonceModalInfoIcon}>📍</Text>
+                                                <View>
+                                                    <Text style={styles.annonceModalInfoLabel}>Lieu de rencontre</Text>
+                                                    <Text style={styles.annonceModalInfoValue}>{selectedAnnonce.lieu}</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+
+                                        <View style={styles.annonceModalDivider} />
+
+                                        <View style={styles.annonceModalForm}>
+                                            <Text style={styles.annonceModalFormTitle}>💰 Faire une offre</Text>
+
+                                            <View style={styles.annonceModalInputGroup}>
+                                                <Text style={styles.annonceModalInputLabel}>Montant proposé</Text>
+                                                <TextInput
+                                                    style={styles.annonceModalInput}
+                                                    placeholder="Ex: 15.00"
+                                                    placeholderTextColor="#999"
+                                                    keyboardType="numeric"
+                                                    value={offerPrice}
+                                                    onChangeText={setOfferPrice}
+                                                />
+                                            </View>
+
+                                            <View style={styles.annonceModalInputGroup}>
+                                                <Text style={styles.annonceModalInputLabel}>Date de la vente</Text>
+                                                <TextInput
+                                                    style={styles.annonceModalInput}
+                                                    placeholder="AAAA-MM-JJ"
+                                                    placeholderTextColor="#999"
+                                                    value={offerDate}
+                                                    onChangeText={setOfferDate}
+                                                />
+                                            </View>
+
+                                            <View style={styles.annonceModalInputGroup}>
+                                                <Text style={styles.annonceModalInputLabel}>Lieu de la vente</Text>
+                                                <TextInput
+                                                    style={styles.annonceModalInput}
+                                                    placeholder="Ex: Cafétéria"
+                                                    placeholderTextColor="#999"
+                                                    value={offerPlace}
+                                                    onChangeText={setOfferPlace}
+                                                />
+                                            </View>
+
+                                            {offerSuccessMessage ? (
+                                                <View style={styles.successContainer}>
+                                                    <Text style={styles.successText}>{offerSuccessMessage}</Text>
+                                                </View>
+                                            ) : null}
+
+                                            {offerErrorMessage ? (
+                                                <View style={styles.errorContainer}>
+                                                    <Text style={styles.errorText}>{offerErrorMessage}</Text>
+                                                </View>
+                                            ) : null}
+
+                                            <View style={styles.annonceModalButtons}>
+                                                <TouchableOpacity style={styles.annonceModalCancelBtn} onPress={closeAnnonceDialog}>
+                                                    <Text style={styles.annonceModalCancelBtnText}>Fermer</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={styles.annonceModalSubmitBtn} onPress={handleSubmitOffer}>
+                                                    <Text style={styles.annonceModalSubmitBtnText}>Envoyer l'offre</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    </>
+                                )}
+                            </ScrollView>
+                        </View>
+                    </KeyboardAvoidingView>
+                </Modal>
+
+                <Modal
+                    visible={avisModalVisible}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={closeAvisModal}
+                >
+                    <KeyboardAvoidingView
+                        style={styles.avisModalOverlay}
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    >
+                        <View style={styles.avisModalCard}>
+                            <TouchableOpacity
+                                style={styles.avisModalCloseBtn}
+                                onPress={closeAvisModal}
+                            >
+                                <Text style={styles.avisModalCloseBtnText}>×</Text>
+                            </TouchableOpacity>
+
+                            <Text style={styles.avisModalTitle}>
+                                {editingAvis?.type === "edit"
+                                    ? "✏️ Modifier mon avis"
+                                    : "⭐ Laisser un avis"}
+                            </Text>
+
+                            <Text style={styles.avisModalLabel}>Note</Text>
+                            <View style={styles.avisStarsContainer}>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <TouchableOpacity
+                                        key={star}
+                                        onPress={() => setAvisNote(String(star))}
+                                        style={styles.avisStarButton}
+                                    >
+                                        <Text style={[
+                                            styles.avisStarIcon,
+                                            parseInt(avisNote) >= star && styles.avisStarIconActive
+                                        ]}>
+                                            ★
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            <Text style={styles.avisModalLabel}>Commentaire</Text>
+                            <TextInput
+                                style={styles.avisModalTextarea}
+                                multiline
+                                numberOfLines={4}
+                                placeholder="Partagez votre expérience..."
+                                placeholderTextColor={theme.textLight}
+                                value={avisCommentaire}
+                                onChangeText={setAvisCommentaire}
+                            />
+
+                            <View style={styles.avisModalButtons}>
+                                <TouchableOpacity
+                                    style={styles.avisModalCancelBtn}
+                                    onPress={closeAvisModal}
+                                >
+                                    <Text style={styles.avisModalCancelBtnText}>Annuler</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.avisModalSubmitBtn}
+                                    onPress={handleSaveAvis}
+                                >
+                                    <Text style={styles.avisModalSubmitBtnText}>Enregistrer</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </KeyboardAvoidingView>
+                </Modal>
+
+
+
+
+                {isOwnProfile && (
+                    <View style={styles.logoutWrapper}>
+                        <TouchableOpacity
+                            style={styles.logoutButton}
+                            onPress={() => {
+                                logOut();
+                                navigation.replace("Connexion");
+                            }}
+
+                        >
+                            <Text style={styles.btnAnnoncesText}>Se déconnecter</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
 
             </ScrollView>
