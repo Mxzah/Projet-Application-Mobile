@@ -20,6 +20,7 @@ import { useTheme } from "/home/etd/Projet-Application-Mobile/code/context/Theme
 import marthaService from "../../services/Martha";
 import { useAuth } from "../../context/AuthContext";
 import { getProfileStyles } from "../../styles";
+import { Ionicons } from '@expo/vector-icons';
 import Proposition from "./Proposition.model";
 
 
@@ -202,28 +203,7 @@ export default function ProfilScreen({ navigation, route }) {
     }, [mesAnnonces, coursMap]);
 
 
-    const renderTabButton = (key, label) => {
-        const isActive = activeTab === key;
-        return (
-            <TouchableOpacity
-                key={key}
-                style={[
-                    styles.tabButton,
-                    isActive && styles.tabButtonActive,
-                ]}
-                onPress={() => setActiveTab(key)}
-            >
-                <Text
-                    style={[
-                        styles.tabButtonText,
-                        isActive && styles.tabButtonTextActive,
-                    ]}
-                >
-                    {label}
-                </Text>
-            </TouchableOpacity>
-        );
-    };
+
 
 
     const handleUpdateProposition = async (id_proposition, nouveauStatut, id_annonce = null) => {
@@ -360,6 +340,38 @@ export default function ProfilScreen({ navigation, route }) {
 
     const { theme, toggleTheme, isDark } = useTheme();
     const styles = getProfileStyles(theme);
+
+    const renderTabButton = (key, label) => {
+        const isActive = activeTab === key;
+        const iconNameMap = {
+            infos: 'person',
+            transactions: 'swap-horizontal',
+            propositions: 'chatbubbles',
+            annonces: 'megaphone',
+            avis: 'star',
+        };
+        const iconName = iconNameMap[key] || 'ellipse';
+
+        return (
+            <TouchableOpacity
+                key={key}
+                style={[
+                    styles.tabButton,
+                    isActive && styles.tabButtonActive,
+                ]}
+                onPress={() => setActiveTab(key)}
+                accessibilityRole="button"
+                accessibilityLabel={label}
+            >
+                <Ionicons
+                    name={iconName}
+                    size={18}
+                    color={isActive ? '#fff' : theme.text}
+                    style={styles.tabButtonIcon}
+                />
+            </TouchableOpacity>
+        );
+    };
 
     const openAnnonceDialog = (annonce) => {
         setSelectedAnnonce(annonce);

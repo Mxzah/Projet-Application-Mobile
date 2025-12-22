@@ -1583,31 +1583,46 @@ export const getProfileStyles = (theme) =>
             marginBottom: 12,
             marginTop: 16,
             borderRadius: 20,
-            overflow: "hidden",
-            borderWidth: 1,
-            borderColor: theme.border,
+            padding: 6,
+            backgroundColor: theme.background,
+            shadowColor: "#000",
+            shadowOpacity: 0.04,
+            shadowRadius: 6,
+            elevation: 2,
         },
 
         tabButton: {
             flex: 1,
-            paddingVertical: 8,
+            paddingVertical: 10,
+            paddingHorizontal: 8,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: theme.card,
+            borderRadius: 16,
+            marginHorizontal: 4,
+            backgroundColor: "transparent",
         },
 
         tabButtonActive: {
             backgroundColor: theme.primary,
+            shadowColor: "#000",
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 3,
         },
 
         tabButtonText: {
             fontSize: 14,
             color: theme.text,
-
+            fontWeight: "600",
+            flexShrink: 1,
+            textAlign: "center",
         },
         tabButtonTextActive: {
             color: "#fff",
-            fontWeight: "600",
+            fontWeight: "700",
+        },
+        tabButtonIcon: {
+            margin: 0,
         },
         btnEditAvis: {
             paddingVertical: 10,
