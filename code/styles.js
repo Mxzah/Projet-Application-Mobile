@@ -410,6 +410,12 @@ export const geAnnoncestStyles = (theme) =>
             fontSize: 14,
             fontWeight: "600",
         },
+        // small red accent for avis error boxes
+        avisErrorAccent: {
+            borderLeftWidth: 4,
+            borderLeftColor: "#dc3545",
+            paddingLeft: 8,
+        },
         dialogCloseButton: {
             position: "absolute",
             top: 12,
@@ -619,6 +625,12 @@ export const getCreateAnnonceStyles = (theme) =>
             color: "#721c24",
             fontSize: 14,
             fontWeight: "600",
+        },
+        // small red accent for avis error boxes
+        avisErrorAccent: {
+            borderLeftWidth: 4,
+            borderLeftColor: "#dc3545",
+            paddingLeft: 8,
         },
     });
 
@@ -1433,6 +1445,21 @@ export const getProfileStyles = (theme) =>
             minHeight: 100,
             textAlignVertical: "top",
             marginBottom: 20,
+        },
+        // translucent red background for avis error messages
+        avisErrorTranslucent: {
+            backgroundColor: "rgba(220,53,69,0.08)",
+            borderLeftWidth: 4,
+            borderLeftColor: "#dc3545",
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 12,
+        },
+        // red accent for avis error boxes in the modal
+        avisErrorAccent: {
+            borderLeftWidth: 4,
+            borderLeftColor: "#dc3545",
+            paddingLeft: 8,
         },
         avisModalButtons: {
             flexDirection: "row",

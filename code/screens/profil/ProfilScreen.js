@@ -56,12 +56,14 @@ export default function ProfilScreen({ navigation, route }) {
     const [offerPlace, setOfferPlace] = useState('');
     const [offerSuccessMessage, setOfferSuccessMessage] = useState('');
     const [offerErrorMessage, setOfferErrorMessage] = useState('');
+    const [avisSuccessMessage, setAvisSuccessMessage] = useState('');
+    const [avisErrorMessage, setAvisErrorMessage] = useState('');
     const [mesPropositions, setMesPropositions] = useState([]);
     const [mesPropositionsEnvoyees, setMesPropositionsEnvoyees] = useState([]);
 
-    const [mesTransactionsAvis, setMesTransactionsAvis] = useState([]); // propositions acceptées où je peux laisser un avis
+    const [mesTransactionsAvis, setMesTransactionsAvis] = useState([]);
     const [avisModalVisible, setAvisModalVisible] = useState(false);
-    const [editingAvis, setEditingAvis] = useState(null); // { type: 'create' | 'edit', id_avis?, id_proposition }
+    const [editingAvis, setEditingAvis] = useState(null);
     const [avisNote, setAvisNote] = useState("5");
     const [avisCommentaire, setAvisCommentaire] = useState("");
     const [activeTab, setActiveTab] = useState("infos");
@@ -104,7 +106,6 @@ export default function ProfilScreen({ navigation, route }) {
                 const annonces = await marthaService.getAnnoncesByUser(idACharger);
                 setMesAnnonces(annonces);
 
-                // Charger les cours pour afficher le nom dans les annonces
                 const coursResponse = await marthaService.getCours();
                 const coursList = coursResponse?.data ?? [];
                 const map = {};
@@ -126,7 +127,6 @@ export default function ProfilScreen({ navigation, route }) {
                         (propositions ?? []).map(Proposition.fromApi)
                     );
 
-                    // Propositions envoyées (où je suis l'acheteur)
                     const sent = await marthaService.getPropositionsSentByUser(currentUser.id);
                     setMesPropositionsEnvoyees((sent ?? []).map(Proposition.fromApi));
                 } else {
@@ -140,7 +140,6 @@ export default function ProfilScreen({ navigation, route }) {
         }, [idProfil, currentUser?.id])
     );
 
-    // Séparer les annonces vendues et non vendues, puis grouper par cours
     const { annoncesActives, annoncesVendues } = useMemo(() => {
         const groupByCours = (annonces) => {
             // Trier par date_debut (plus récent en premier)
@@ -150,7 +149,6 @@ export default function ProfilScreen({ navigation, route }) {
                 return dateB - dateA;
             });
 
-            // Grouper par cours
             const groups = {};
             const sansCoursKey = '__sans_cours__';
 
@@ -162,7 +160,6 @@ export default function ProfilScreen({ navigation, route }) {
                 groups[key].push(annonce);
             });
 
-            // Convertir en tableau
             const result = [];
 
             const coursKeys = Object.keys(groups)
@@ -192,7 +189,6 @@ export default function ProfilScreen({ navigation, route }) {
             return result;
         };
 
-        // Séparer vendues et non vendues
         const actives = mesAnnonces.filter(a => !a.est_vendue);
         const vendues = mesAnnonces.filter(a => a.est_vendue);
 
@@ -214,8 +210,7 @@ export default function ProfilScreen({ navigation, route }) {
 
         if (!ok) return;
 
-        // Si la proposition est acceptée (statut 2), marquer l'annonce comme vendue
-        // et refuser toutes les autres propositions pour cette annonce
+
         if (nouveauStatut === 2 && id_annonce) {
             await marthaService.markAnnonceAsSold(id_annonce);
             // Mettre à jour la liste des annonces localement
@@ -227,19 +222,16 @@ export default function ProfilScreen({ navigation, route }) {
                 )
             );
 
-            // Refuser toutes les autres propositions en attente pour cette annonce
             const autresPropositions = mesPropositions.filter(
                 (p) => p.id_annonce === id_annonce &&
                     p.id_proposition !== id_proposition &&
                     p.id_statut === 1 // en attente
             );
 
-            // Mettre à jour chaque proposition sur le backend
             for (const prop of autresPropositions) {
                 await marthaService.updatePropositionStatut(prop.id_proposition, 3); // 3 = refusée
             }
 
-            // Mettre à jour l'état local pour toutes les propositions de cette annonce
             setMesPropositions((prev) =>
                 prev.map((p) => {
                     if (p.id_proposition === id_proposition) {
@@ -472,6 +464,9 @@ export default function ProfilScreen({ navigation, route }) {
             transaction.note ? String(transaction.note) : "5"
         );
         setAvisCommentaire(transaction.commentaire ?? "");
+        // clear previous messages
+        setAvisErrorMessage("");
+        setAvisSuccessMessage("");
         setAvisModalVisible(true);
     };
 
@@ -485,6 +480,9 @@ export default function ProfilScreen({ navigation, route }) {
 
         setAvisNote(String(avis.note));
         setAvisCommentaire(avis.commentaire ?? "");
+        // clear previous messages
+        setAvisErrorMessage("");
+        setAvisSuccessMessage("");
         setAvisModalVisible(true);
     };
 
@@ -494,76 +492,102 @@ export default function ProfilScreen({ navigation, route }) {
         setEditingAvis(null);
         setAvisNote("5");
         setAvisCommentaire("");
+        setAvisErrorMessage("");
+        setAvisSuccessMessage("");
     };
 
 
     const handleSaveAvis = async () => {
         if (!editingAvis) return;
 
+        // reset messages
+        setAvisErrorMessage("");
+        setAvisSuccessMessage("");
+
         const noteNumber = Number(avisNote);
         if (!Number.isFinite(noteNumber) || noteNumber < 1 || noteNumber > 5) {
-            alert("La note doit être entre 1 et 5.");
+            setAvisErrorMessage("La note doit être entre 1 et 5.");
             return;
         }
 
         if (!currentUser) {
-            alert("Vous devez être connecté pour laisser un avis.");
+            setAvisErrorMessage("Vous devez être connecté pour laisser un avis.");
             return;
         }
 
-        let ok = false;
-
-        if (editingAvis.type === "create") {
-            ok = await marthaService.createAvis({
-                id_proposition: editingAvis.id_proposition,
-                id_noteur: currentUser.id,
-                note: noteNumber,
-                commentaire: String(avisCommentaire),
-            });
-
-            if (!ok) {
-                alert("Impossible d'enregistrer l'avis.");
-                return;
-            }
-
-            const [tx, avis] = await Promise.all([
-                marthaService.getTransactionsPourAvis(currentUser.id),
-                marthaService.getAvisByUser(currentUser.id),
-            ]);
-            setMesTransactionsAvis(tx);
-            setMesAvis(avis);
-
-        } else if (editingAvis.type === "edit") {
-            ok = await marthaService.updateAvis({
-                id_avis: editingAvis.id_avis,
-                id_noteur: currentUser.id,
-                note: noteNumber,
-                commentaire: String(avisCommentaire),
-            });
-
-            if (!ok) {
-                alert("Impossible de mettre à jour l'avis.");
-                return;
-            }
-
-            setMesAvis((prev) =>
-                prev.map((a) =>
-                    a.id_avis === editingAvis.id_avis
-                        ? {
-                            ...a,
-                            note: noteNumber,
-                            commentaire: avisCommentaire,
-                            date_avis: new Date().toISOString(),
-                        }
-                        : a
-                )
-            );
-
-            const tx = await marthaService.getTransactionsPourAvis(currentUser.id);
-            setMesTransactionsAvis(tx);
+        const commentaireTrim = String(avisCommentaire ?? "").trim();
+        const minLen = editingAvis.type === "create" ? 5 : 3;
+        if (commentaireTrim.length < minLen) {
+            setAvisErrorMessage(`Le commentaire doit contenir au moins ${minLen} caractères.`);
+            return;
         }
 
-        closeAvisModal();
+        try {
+            let ok = false;
+
+            if (editingAvis.type === "create") {
+                ok = await marthaService.createAvis({
+                    id_proposition: editingAvis.id_proposition,
+                    id_noteur: currentUser.id,
+                    note: noteNumber,
+                    commentaire: commentaireTrim,
+                });
+
+                if (!ok) {
+                    setAvisErrorMessage("Impossible d'enregistrer l'avis.");
+                    return;
+                }
+
+                const [tx, avis] = await Promise.all([
+                    marthaService.getTransactionsPourAvis(currentUser.id),
+                    marthaService.getAvisByUser(currentUser.id),
+                ]);
+                setMesTransactionsAvis(tx);
+                setMesAvis(avis);
+
+                setAvisSuccessMessage("Votre avis a bien été publié.");
+                setTimeout(() => {
+                    closeAvisModal();
+                }, 1500);
+
+            } else if (editingAvis.type === "edit") {
+                ok = await marthaService.updateAvis({
+                    id_avis: editingAvis.id_avis,
+                    id_noteur: currentUser.id,
+                    note: noteNumber,
+                    commentaire: commentaireTrim,
+                });
+
+                if (!ok) {
+                    setAvisErrorMessage("Impossible de mettre à jour l'avis.");
+                    return;
+                }
+
+                setMesAvis((prev) =>
+                    prev.map((a) =>
+                        a.id_avis === editingAvis.id_avis
+                            ? {
+                                ...a,
+                                note: noteNumber,
+                                commentaire: commentaireTrim,
+                                date_avis: new Date().toISOString(),
+                            }
+                            : a
+                    )
+                );
+
+                const tx = await marthaService.getTransactionsPourAvis(currentUser.id);
+                setMesTransactionsAvis(tx);
+
+                setAvisSuccessMessage("Votre avis a bien été mis à jour.");
+                setTimeout(() => {
+                    closeAvisModal();
+                }, 1200);
+            }
+        } catch (error) {
+            console.error("Erreur lors de la sauvegarde de l'avis:", error);
+            setAvisErrorMessage("Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.");
+        }
     };
 
 
@@ -1254,6 +1278,19 @@ export default function ProfilScreen({ navigation, route }) {
                             </View>
 
                             <Text style={styles.avisModalLabel}>Commentaire</Text>
+
+                            {avisSuccessMessage ? (
+                                <View style={styles.successContainer}>
+                                    <Text style={styles.successText}>{avisSuccessMessage}</Text>
+                                </View>
+                            ) : null}
+
+                            {avisErrorMessage ? (
+                                <View style={styles.avisErrorTranslucent}>
+                                    <Text style={styles.errorText}>{avisErrorMessage}</Text>
+                                </View>
+                            ) : null}
+
                             <TextInput
                                 style={styles.avisModalTextarea}
                                 multiline
