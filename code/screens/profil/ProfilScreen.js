@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-import { useTheme } from "/home/etd/Projet-Application-Mobile/code/context/ThemeContext.js";
+import { useTheme } from "../../context/ThemeContext";
 import marthaService from "../../services/Martha";
 import { useAuth } from "../../context/AuthContext";
 import { getProfileStyles } from "../../styles";
@@ -285,8 +285,7 @@ export default function ProfilScreen({ navigation, route }) {
 
                         setMesAvis((prev) => prev.filter(a => a.id_avis !== avis.id_avis));
 
-                        // IMPORTANT: si tu as l'onglet "Transactions à évaluer"
-                        // il faut recharger pour que la transaction redevienne "à évaluer" (sans avis)
+
                         if (currentUser?.id) {
                             const tx = await marthaService.getTransactionsPourAvis(currentUser.id);
                             setMesTransactionsAvis(tx);
@@ -464,7 +463,6 @@ export default function ProfilScreen({ navigation, route }) {
             transaction.note ? String(transaction.note) : "5"
         );
         setAvisCommentaire(transaction.commentaire ?? "");
-        // clear previous messages
         setAvisErrorMessage("");
         setAvisSuccessMessage("");
         setAvisModalVisible(true);
