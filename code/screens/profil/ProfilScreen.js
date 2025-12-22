@@ -734,16 +734,27 @@ export default function ProfilScreen({ navigation, route }) {
                                                 Acceptée le {dateTexte}
                                             </Text>
 
-                                            <TouchableOpacity
-                                                style={aDejaAvis ? styles.btnAvisInline : styles.btnAvis}
-                                                onPress={() => openAvisModalFromTransaction(item)}
-                                            >
-                                                <Text style={aDejaAvis ? styles.btnAvisInlineText : styles.btnAvisText}>
-                                                    {aDejaAvis
-                                                        ? "Modifier mon avis"
-                                                        : "Laisser un avis"}
-                                                </Text>
-                                            </TouchableOpacity>
+                                            <View style={styles.avisInlineActions}>
+                                                <TouchableOpacity
+                                                    style={aDejaAvis ? styles.btnAvisInline : styles.btnAvis}
+                                                    onPress={() => openAvisModalFromTransaction(item)}
+                                                >
+                                                    <Text style={aDejaAvis ? styles.btnAvisInlineText : styles.btnAvisText}>
+                                                        {aDejaAvis
+                                                            ? "Modifier mon avis"
+                                                            : "Laisser un avis"}
+                                                    </Text>
+                                                </TouchableOpacity>
+
+                                                {aDejaAvis && item.id_avis ? (
+                                                    <TouchableOpacity
+                                                        style={styles.btnDeleteAvisInline}
+                                                        onPress={() => handleDeleteAvis({ id_avis: item.id_avis })}
+                                                    >
+                                                        <Text style={styles.btnDeleteAvisInlineText}>Supprimer</Text>
+                                                    </TouchableOpacity>
+                                                ) : null}
+                                            </View>
                                         </View>
                                     );
                                 }}

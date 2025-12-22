@@ -1664,6 +1664,26 @@ export const getProfileStyles = (theme) =>
             color: theme.primary,
             fontWeight: "700",
         },
+        // inline delete next to edit
+        avisInlineActions: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 8,
+        },
+        btnDeleteAvisInline: {
+            paddingVertical: 6,
+            paddingHorizontal: 10,
+            borderRadius: 999,
+            backgroundColor: "#E53935",
+            alignItems: "center",
+            justifyContent: "center",
+        },
+        btnDeleteAvisInlineText: {
+            color: "#fff",
+            fontWeight: "700",
+            fontSize: 12,
+        },
         backButton: {
             position: "absolute",
             top: 10,
